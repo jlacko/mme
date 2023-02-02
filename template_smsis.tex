@@ -1,0 +1,105 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% This is file `smsis-template.tex',
+%%
+%% Copyright 2016 SMSIS - Lucie Chytilov?, V?B-TU Ostrava
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% Using the `smsis' class: commented example 
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% Start with \documentclass 
+%% 
+\documentclass{smsisproc}
+%%
+%% Put your custom packages here, for example:
+%%
+\usepackage[round]{natbib}
+\usepackage{array}
+\usepackage{pgf}     
+\usepackage{booktabs}   
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{enumerate}
+\usepackage[setpagesize=false, 
+            unicode=false, 
+            colorlinks=true, 
+            urlcolor=blue, 
+            linkcolor=black]{hyperref} 
+\usepackage{natbib}
+\setlist{nolistsep}
+\linespread{0.95}
+%%
+%% Some packages are already preloaded, they do not to be loaded: graphicx, geometry, amsmath, amssymb, and ams
+%%
+%% Put your custom definitions here:
+\DeclareMathOperator\var{var}
+\newcolumntype{R}{>{\centering\arraybackslash}X}
+$if(csl-refs)$
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{1.5em}
+\newlength{\csllabelwidth}
+\setlength{\csllabelwidth}{3em}
+\newlength{\cslentryspacingunit} % times entry-spacing
+\setlength{\cslentryspacingunit}{\parskip}
+\newenvironment{CSLReferences}[2] % #1 hanging-ident, #2 entry spacing
+ {% don't indent paragraphs
+  \setlength{\parindent}{0pt}
+  % turn on hanging indent if param 1 is 1
+  \ifodd #1
+  \let\oldpar\par
+  \def\par{\hangindent=\cslhangindent\oldpar}
+  \fi
+  % set entry spacing
+  \setlength{\parskip}{#2\cslentryspacingunit}
+ }%
+ {}
+\usepackage{calc}
+\newcommand{\CSLBlock}[1]{#1\hfill\break}
+\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{#1}}
+\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{#1}\break}
+\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
+$endif$
+%% Start your document
+%%
+\begin{document}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% TITLE PAGE INFORMATION                       
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% Mandatory information: title, author, institute, abstract, keywords
+%% Optional information: e-mail and JEL classification
+%%
+%% The order in which the info is introduced is not important
+%%
+%%
+\title{$title$}
+\author{
+  	$author$\null
+    	\institute{$affiliation$}
+    	\email{$email$}
+  }
+%%
+\begin{abstract} \fontsize{11pt}{13pt}\selectfont
+  	$abstract$
+\end{abstract}
+%%
+\keywords{$keywords$} 	% Keywords
+%%
+\jelsubjclass{$JEL$}  % JEL classification
+%%
+%% generate the title
+\maketitle
+%% no numbering of the title page
+\thispagestyle{empty}
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% ARTICLE TEXT
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+
+$body$ 
+
+\end{document}
