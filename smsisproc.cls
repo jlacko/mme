@@ -120,7 +120,7 @@
       \parindent=\z@\parskip=6pt
       \box\smsisproc@abstractbox\par
 	\fontsize{11pt}{13pt}\selectfont
-    \textbf{Keywords:} \@keywords\par
+    {\bfseries\noindent Keywords:} \@keywords\par
     \@jelsubjclass\parskip\z@\par
     \@amssubjclass\par
     \end{minipage}
@@ -209,6 +209,27 @@
   \maketitle
 }{\relax}
 \def\acknowledgements{\section*{Acknowledgements}}
+%%
+% The bibliography
+%%
+\makeatletter
+\renewcommand\@biblabel[1]{}
+\renewenvironment{thebibliography}[1]
+     {\section*{\refname}
+      \@mkboth{\MakeUppercase\refname}{\MakeUppercase\refname}
+      \list{}
+           {[leftmargin=!,labelindent=5pt,itemindent=-15pt]
+            \@openbib@code
+            \usecounter{enumiv}}
+      \sloppy
+      \clubpenalty4000
+      \@clubpenalty \clubpenalty
+      \widowpenalty4000
+      \sfcode`\.\@m}
+     {\def\@noitemerr
+       {\@latex@warning{Empty `thebibliography' environment}}
+      \endlist}
+\makeatother
 %%
 %% End of file `smsisproc.cls'.
 %%
