@@ -1,11 +1,13 @@
 ---
 title: 'Příspěvek na MME 2023'
 abstract: 
-  'Máma mám mísu, Ema mele maso, Kája nemá nohu, ó my se máme!'
+  'Abstract text goes here. This template provides necessary styles and examples to produce valid paper for the international conference on Mathematical Methods in Economics organized by Czech Society for Operations Research and collaborating institutions. The submitted paper cannot be longer than six pages including results, figures and references.'
 keywords: 
   'zničit krtka, Talpa, Miller'
 JEL:
     'zde budiž jel klasifikace'
+AMS:
+    'zde budiž ams klasifikace'
 author: 'Jindra Lacko'
 affiliation: 'Vysoká škola ekonomická v Praze / Katedra Ekonometrie'
 email: 'jindra.lacko@vse.cz'
