@@ -1,42 +1,33 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%
-%% This is file `smsis-template.tex',
-%%
-%% Copyright 2016 SMSIS - Lucie Chytilov?, V?B-TU Ostrava
-%%
+%% Using the `mmeproc' class: commented example                    %%
+%% To be compiled with LaTeX 2e                                    %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
-%% Using the `smsis' class: commented example 
+%% Start with \documentclass, omit any page/size options
 %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%
-%% Start with \documentclass 
-%% 
-\documentclass{smsisproc}
-%%
+\documentclass{mmeproc}
+
 %% Put your custom packages here, for example:
-%%
-\usepackage[round]{natbib}
-\usepackage{array}
-\usepackage{pgf}     
-\usepackage{booktabs}   
-\usepackage{tabularx}
-\usepackage{enumitem}
-\usepackage{enumerate}
+\usepackage{pgf}        % advanced graphics
+
+%% Some packages are already preloaded, you do not need load them
+%% anymore: graphicx, geometry, amsmath, amssymb, and ams
+
+
+%% Put your custom definitions here, for example:
+\makeatletter
+\def\convertto#1#2{\strip@pt\dimexpr #2*65536/\number\dimexpr 1#1}
+\makeatother
+
+% math operator for variance
+\DeclareMathOperator\var{var}
+
 \usepackage[setpagesize=false, 
             unicode=false, 
             colorlinks=true, 
             urlcolor=blue, 
             linkcolor=black]{hyperref} 
-\usepackage{natbib}
-\setlist{nolistsep}
-\linespread{0.95}
-%%
-%% Some packages are already preloaded, they do not to be loaded: graphicx, geometry, amsmath, amssymb, and ams
-%%
-%% Put your custom definitions here:
-\DeclareMathOperator\var{var}
-\newcolumntype{R}{>{\centering\arraybackslash}X}
+
 $if(csl-refs)$
 \newlength{\cslhangindent}
 \setlength{\cslhangindent}{1.5em}
@@ -62,18 +53,18 @@ $if(csl-refs)$
 \newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{#1}\break}
 \newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
 $endif$
+
 %% Start your document
-%%
+
 \begin{document}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% TITLE PAGE INFORMATION                       
+%%                   TITLE PAGE INFORMATION                        %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% mandatory information: title, author, institute, abstract, keywords
+%% optional information: e-mail, JEL and AMS classification
 %%
-%% Mandatory information: title, author, institute, abstract, keywords
-%% Optional information: e-mail and JEL classification
-%%
-%% The order in which the info is introduced is not important
-%%
+%% the order in which the info is introduced is not important
 %%
 \title{$title$}
 \author{
@@ -94,12 +85,14 @@ $endif$
 \maketitle
 %% no numbering of the title page
 \thispagestyle{empty}
-%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                      ARTICLE TEXT                               %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% ARTICLE TEXT
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%
 
-$body$ 
+$body$
+
+\acknowledgements
+Supporting people and institutions (including Science Foundations) go here.
+
 
 \end{document}

@@ -1,4 +1,3 @@
-# SMISIS
-Strategic Management and its Support by Information Systems 2023 submission
+# MME2023
 
-Příspěvek na 15. odbornou konferenci na VŠB OVA
+Příspěvek na odbornou konferenci https://mme2023.vse.cz/
