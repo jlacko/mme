@@ -36,6 +36,7 @@ Kdy, ó Catilino, hodláš přestat obtěžovat naší trpělivost? @coffman2017
 
 ```{r rnorm}
 #| fig-cap: rnorm
+#| fig-pos: h
 plot(rnorm(10))
 ```
 Ostuda věku a jeho principů! Senát si je vědom těchto věcí; konzul je vidí a přesto tento muž žije. Žije! Ano a dokonce přijde do senátu. Účastní se omezování veřejné svobody; sleduje a značí si a poznamenává každého z jedinců mezi námi, aby ho zabil. A my, stateční mužové, kterými jsme, myslíme, že konáme naši povinnost vůči republice tím, že se vyhýbáme jeho zuřivým útokům.
@@ -50,14 +51,15 @@ Přeji si, ó ctihodní otcové, abych byl milosrdný; nepřeji si vypadat nedba
 
 V Itálii se nachází tábor, u přístupu do Etrurie, který je nepřátelský vůči republice, počet nepřátel vzrůstá každý den a přesto velitele toho tábora, vůdce těchto nepřátel, vidíme uvnitř hradeb – ano, a dokonce v senátu, – plánujícího každý den nějaké vnitřní zranění republice. Kdybych, ó Catilino, nyní nařídil tvoje uvěznění, tvoji smrt, musel bych se bát méně toho, že by všichni dobří mužové řekli, že jsem jednal pomalu, než že by kterýkoliv z nich potvrdil, že jsem jednal krutě. Ale já neprovedl to, co mělo být provedeno již před dlouhou dobou, mám proto velmi dobrý důvod; nechám tě usmrtit až tehdy, až nebude možné najít jedinou osobu tak bezbožnou, tak opuštěnou, takovou jako jsi ty. Pak to bude provedeno řádně.
 
+```{r pressure}
+#| fig-cap: pressure
+#| fig-pos: h
+plot(pressure)
+```
+
 Pokud bude žít jen jedna osoba, která se může opovážit tě hájit, budeš ještě žít; ale budeš žít tak jako nyní, obklopen mými mnohými a spolehlivými strážemi, takže nebudeš moci zvednout jediný prst proti republice: mnoho očí a uší tě bude stále pozorovat a střežit, stejně jako činily doposud ačkoliv ty je nepostřehneš. Protože co zde, ó Catilino, můžeš ještě očekávat, jestliže noc není schopna zakrýt tvoje hanebné schůzky v temnotě a jestliže ani soukromé domy neudrží hlas tvého spiknutí ve svých zdech, – jestliže je všechno pozorováno a odhaleno? Změň názor: věř mi: zapomeň na zabíjení a požár, o kterém přemýšlíš. Jsi obklíčen ze všech stran; všechny plány jsou nám jasnější dne; dovol mi, abych ti je připomněl. 
 
 Vzpomínáš si, že 21. října jsem řekl v senátu, že v určitý den, kterým byl 27. říjen, bude tvůj spoluviník a sluha tvé drzosti ve zbrani? A spletl jsem se snad, Catilino, ne pouze v tak důležitém, tak krutém, tak neuvěřitelném faktu, ale i v tom co je mnohem pozoruhodnější, v samotném dni? Řekl jsem také v senátu, že jsi připravil masakr všech urozených na 28. října, kdy mnoho důležitých mužů senátu opustilo Řím ani ne tak pro svoji vlastní záchranu jako pro ověření tvých plánů. Můžeš popřít, že jsi v onen den byl tak obklíčen mými strážemi a mojí pozorností, že jsi nebyl schopen zvednout proti republice jediný prst; když jsi prohlásil, že se spokojíš s útěkem zbytku a pozabíjením nás zbývajících? 
-
-```{r pressure}
-#| fig-cap: pressure
-plot(pressure)
-```
 
 Copak? Když jsi zajistil, že budeš schopen obsadit prvního listopadu nočním útokem Praeneste, nezjistil jsi že ta kolonie byla opevněna podle mého rozkazu, mojí posádkou, mojí pozorností a péčí? Neuděláš nic, nepřipravíš nic, nebudeš myslet na nic o čem bych nejenže neslyšel ale co bych neviděl a o čem bych neznal každou podrobnost. Poslouchej, když budu mluvit o včerejší noci. Teď uvidíš že já střežím bezpečnost republiky mnohem více, než ty plánuješ její zničení. Říkám, že jsi minulou noc přišel do domu Marca Lecca a že mnoho tvých společníků v téže choromyslnosti a bezbožnosti tam přišlo také. Opovažuješ se to popřít? Proč jsi tak tichý? Dokáži to, jestliže to popřeš, protože zde v senátu vidím některé z mužů, kteří tam byli s tebou. 
 
