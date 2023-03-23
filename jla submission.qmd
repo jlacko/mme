@@ -30,19 +30,7 @@ csl:
   'ieee.csl'
 ---
 
-# Introduction
-
-Reducing CO~2~ emissions significantly in comparison to 1990 levels is a target of both global @paris16  and regional initiatives @green_deal19. A key factor for achieving this aim is reducing the volume of CO~2~ emissions from transportation @proposal21. This is in line with the contribution transportation related emissions have made to the current stock of CO~2~ in the Earth's atmosphere @cwatch_dex.
-
-In order to achieve these aims it will be necessary to significantly reduce the volume of active Interal Combustion Engine (ICE) vehicles on EU roads. While alternatives to personal vehicle ownership such as mass transit and bicycling are certain to be a part of the solution it is unlikely that the current level of vehicle ownership (over 6 million personal vehicles are registered in the Czech Republic alone, a country of 10 million inhabitants @slaba_houst22) could be feasibly reduced to zero.
-
-As a consequence any plan to reduce and / or eliminate ICE personal vehicle ownership and use must include introducing of alternatives, such as Electric Vehicles (EV's).
-
-# Literature review 
-
-# Methodology
-
-```{r init}
+```{r setup}
 #| echo: FALSE
 #| eval: TRUE
 
@@ -56,29 +44,51 @@ prettyprc <- function(x) {
   res
 }
 
+prettynum <- function(x) {
+  
+  prettyNum(x, big.mark = " ")
+  
+}
+
+library(RCzechia)
 library(dplyr)
 library(dbplyr)
 library(tidyr)
 library(ggplot2)
+library(forcats)
+library(knitr)
+library(kableExtra)
 
 con <- DBI::dbConnect(RSQLite::SQLite(), "~/Documents/elektroauta/data/auta.sqlite") # připojit databázi
 
 registrace <- tbl(con, 'registrace_pracovni') %>% 
-  # osobáky, bez firem a leasingu
-  filter(typ_obchodu == 'retail' & kategorie == "M1") %>% 
-  filter(rok_registrace >= '2018' & rok_registrace <= '2022') %>% 
-  group_by(rok_registrace, KOD_ORP, typ) %>% 
-  summarise(pocet = count(vin)) %>% 
-  collect() %>% 
-  pivot_wider(names_from = typ, values_from = pocet, values_fill = 0) %>% 
-  mutate(pct_spalovaci = spalovací / (spalovací + elektro + hybrid)) %>% 
-  mutate(pct_friendly = 1 - pct_spalovaci) %>% 
-  ungroup()
+  filter(rok_registrace >= '2019' 
+         & rok_registrace <= '2022'
+         & kategorie == "M1")
 
-DBI::dbDisconnect(con) # poslední zhasne...
+```
+
+# Introduction
+
+Reducing CO~2~ emissions significantly in comparison to 1990 levels is a target of both global @paris16  and regional initiatives @green_deal19. A key factor for achieving this aim is reducing the volume of CO~2~ emissions from transportation @proposal21. This is in line with the contribution transportation related emissions have made to the current stock of CO~2~ in the Earth's atmosphere @cwatch_dex.
+
+In order to achieve these aims it will be necessary to significantly reduce the volume of active Interal Combustion Engine (ICE) vehicles on EU roads. While alternatives to personal vehicle ownership such as mass transit and bicycling are certain to be a part of the solution it is unlikely that the current level of vehicle ownership (over 6 million personal vehicles are registered in the Czech Republic alone, a country of 10 million inhabitants @slaba_houst22) could be feasibly reduced to zero.
+
+As a consequence any plan to reduce and / or eliminate ICE personal vehicle ownership and use must include introducing of alternatives, such as Electric Vehicles (EV's).
+
+
+
+
+# Methodology
+
+
+```{r summary}
 
 rocne <- registrace %>% 
-  group_by(rok_registrace) %>% 
+  group_by(rok_registrace, typ_obchodu, typ)  %>%
+  summarise(pocet = n()) %>% 
+  collect() %>% 
+  pivot_wider(names_from = typ, values_from = pocet, values_fill = 0) %>% 
   summarise(
     spalovaci = sum(spalovací),
     elektro = sum(elektro),
@@ -87,18 +97,94 @@ rocne <- registrace %>%
     podil_elektro = elektro / celkem,
     podil_hybrid = hybrid / celkem,
     podil_ev = podil_elektro + podil_hybrid
-            )
-
+            ) %>% 
+  ungroup()
+ 
 ```
 
 The data were collected from the Czech Ministry of Transport Open Data @registr monthly snapshots. For the purpose of our analysis the only registrations from years `r min(rocne$rok_registrace)` to `r max(rocne$rok_registrace)` were used. 
 
-In order to focus on end consumer activity we considered only personal vehicles (category M1) registered by natural persons. While electrification of corporate fleets is expected to contribute to the overall reduciton of transport CO~2~ emissions the behaviour of corporate fleets and vehicles under leasing contracts is difficult to model based on local socioeconomic variables. Reasons for this difficulty include the practice of corporate registrations being filed in the municipality of company registration.
+During the period in question total of `r prettynum(sum(rocne$spalovaci) + sum(rocne$elektro) + sum(rocne$hybrid))` personal vehicles were registered, of which `r prettynum(sum(rocne$elektro) + sum(rocne$hybrid))` could be considered EV's (`r prettynum(sum(rocne$elektro))` battery operated EVs and `r prettynum(sum(rocne$hybrid))` hybrid EVs).
 
-During the period in question total of `r prettyNum(sum(rocne$spalovaci) + sum(rocne$elektro) + sum(rocne$hybrid),  big.mark = " ")` retail personal vehicles were registered, of which `r prettyNum(sum(rocne$elektro) + sum(rocne$hybrid), big.mark = " ")` could be considered EV's (`r prettyNum(sum(rocne$elektro),  big.mark = " ")` battery operated EVs and `r prettyNum(sum(rocne$hybrid),  big.mark = " ")` hybrid EVs).
+Majority of the EV registrations come from the non-retail segment (vehicle registrations by companies) - `r prettynum(sum(subset(rocne, typ_obchodu == "non-retail")$elektro) + sum(subset(rocne, typ_obchodu == "non-retail")$hybrid))` registrations. Compared to this the retail segment (vehicle registrations by natural persons) had only `r prettynum(sum(subset(rocne, typ_obchodu == "retail")$elektro) + sum(subset(rocne, typ_obchodu == "retail")$hybrid))` registrations, which is `r prettyprc((sum(subset(rocne, typ_obchodu == "retail")$elektro) + sum(subset(rocne, typ_obchodu == "retail")$hybrid)) / (sum(rocne$elektro)+sum(rocne$hybrid)))` of total EV registrations over the period in consideration.
 
-The share of EVs over total retail personal vehicles ranged from `r prettyprc(min(rocne$podil_ev))` in `r rocne$rok_registrace[which.min(rocne$podil_ev)]` `r prettyprc(max(rocne$podil_ev))` in `r rocne$rok_registrace[which.max(rocne$podil_ev)]`.
+The for a detailed breakdown over brands and models see @tbl-models.
 
+In order to focus on end consumer activity we considered only personal vehicles (category M1) registered by natural persons (retail registrations). While electrification of corporate fleets is expected to contribute to the overall reduciton of transport CO~2~ emissions the behaviour of corporate fleets and vehicles under leasing contracts is a separate problem, infeasible to model based on local socioeconomic variables.
+
+```{r models}
+#| label: tbl-models
+#| tbl-cap: Model Breakdown
+
+model_breakdown <- registrace %>% 
+  filter(typ != "spalovací") %>% 
+  select(typ_obchodu, tovarni_znacka, obchodni_oznaceni, vin) %>% 
+  collect()
+
+vyznamne_znacky <- model_breakdown %>%
+  group_by(tovarni_znacka) %>% 
+  tally() %>%
+  filter(n > 50) %>% 
+  pull(tovarni_znacka)
+
+model_breakdown <- model_breakdown %>% 
+  mutate(mod_znacka = case_when(tovarni_znacka %in% vyznamne_znacky ~ tovarni_znacka,
+                                T ~ "other brands")) %>% 
+  mutate(mod_znacka = fct_infreq(mod_znacka)) %>% 
+  mutate(mod_znacka = fct_relevel(mod_znacka, "other brands", after = Inf)) %>% 
+  pivot_wider(names_from = typ_obchodu, 
+              values_from = vin,
+              values_fn = list(vin = length),
+              values_fill = 0) %>% 
+  mutate(mod_oznaceni = case_when(retail + `non-retail` < 15 ~ "other models",
+                                  !mod_znacka %in% vyznamne_znacky ~ "other models",
+                                  TRUE ~ obchodni_oznaceni)) %>% 
+  group_by(mod_znacka, mod_oznaceni) %>% 
+  summarise(retail = sum(retail),
+            non_retail = sum(`non-retail`)) %>% 
+  arrange(desc(retail + non_retail), .by_group = T) %>% 
+  bind_rows(tibble(mod_znacka = '',
+                   mod_oznaceni = '',
+                   retail = sum(.$retail),
+                   non_retail = sum(.$non_retail))) %>% 
+  mutate(retail = prettynum(retail),
+         non_retail = prettynum(non_retail))
+  
+model_breakdown %>%   
+  kable(format = "latex",
+        booktabs = T,
+        align = c("l", "l", "r", "r"),
+        col.names = c("Brand", "Model", "Retail", "Non-Retail"),
+        linesep = '') %>% 
+  kable_styling(full_width = F,
+                latex_options = "hold_position") %>% 
+  row_spec(0, bold = T, align = 'c') %>% 
+  row_spec(nrow(model_breakdown)-1, hline_after = T)
+
+```
+
+bflm psvz
+
+```{r mapa-penetrace}
+registrace_orp <- registrace %>% 
+  group_by(KOD_ORP, typ_obchodu, typ, vin) %>% 
+  summarise(pocet = n()) %>% 
+  collect() %>% 
+  pivot_wider(names_from = typ, values_from = pocet, values_fill = 0) %>% 
+  summarise(
+    spalovaci = sum(spalovací),
+    elektro = sum(elektro),
+    hybrid = sum(hybrid),
+    celkem = spalovaci + elektro + hybrid,
+    podil_elektro = elektro / celkem,
+    podil_hybrid = hybrid / celkem,
+    podil_ev = podil_elektro + podil_hybrid
+            ) %>% 
+  ungroup()
+  
+
+
+```
 
 # Result 
 
@@ -107,3 +193,9 @@ The share of EVs over total retail personal vehicles ranged from `r prettyprc(mi
 # Conclusion
 
 # References
+
+```{r finally}
+
+DBI::dbDisconnect(con) # poslední zhasne...
+
+```
