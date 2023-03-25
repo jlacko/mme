@@ -50,6 +50,43 @@ prettynum <- function(x) {
   
 }
 
+# https://stackoverflow.com/questions/21708764/cannot-change-text-size-in-regsubsets-plot
+plot_regsubsets_mod <- function (x, labels = obj$xnames, main = NULL, scale = c("bic", 
+    "Cp", "adjr2", "r2"), col = gray(seq(0, 0.9, length = 10)), 
+    ...) 
+{
+    obj <- x
+    lsum <- summary(obj)
+    par(mar = c(7, 5, 6, 3) + 0.1)
+    nmodels <- length(lsum$rsq)
+    np <- obj$np
+    propscale <- FALSE
+    sscale <- pmatch(scale[1], c("bic", "Cp", "adjr2", "r2"), 
+        nomatch = 0)
+    if (sscale == 0) 
+        stop(paste("Unrecognised scale=", scale))
+    if (propscale) 
+        stop(paste("Proportional scaling only for probabilities"))
+    yscale <- switch(sscale, lsum$bic, lsum$cp, lsum$adjr2, lsum$rsq)
+    up <- switch(sscale, -1, -1, 1, 1)
+    index <- order(yscale * up)
+    colorscale <- switch(sscale, yscale, yscale, -log(pmax(yscale, 
+        1e-04)), -log(pmax(yscale, 1e-04)))
+    image(z = t(ifelse(lsum$which[index, ], colorscale[index], 
+        NA + max(colorscale) * 1.5)), xaxt = "n", yaxt = "n", 
+        x = (1:np), y = 1:nmodels, xlab = "", ylab = scale[1], 
+        col = col)
+    laspar <- par("las")
+    on.exit(par(las = laspar))
+    par(las = 2)
+    axis(1, at = 1:np, labels = labels, ...) # I modified this line
+    axis(2, at = 1:nmodels, labels = signif(yscale[index], 2))
+    if (!is.null(main)) 
+        title(main = main)
+    box()
+    invisible(NULL)
+}
+
 library(RCzechia)
 library(dplyr)
 library(dbplyr)
@@ -110,7 +147,6 @@ Majority of the EV registrations come from the non-retail segment (vehicle regis
 
 The for a detailed breakdown over brands and models see @tbl-models.
 
-In order to focus on end consumer activity we considered only personal vehicles (category M1) registered by natural persons (retail registrations). While electrification of corporate fleets is expected to contribute to the overall reduciton of transport CO~2~ emissions the behaviour of corporate fleets and vehicles under leasing contracts is a separate problem, infeasible to model based on local socioeconomic variables.
 
 ```{r models}
 #| label: tbl-models
@@ -163,9 +199,17 @@ model_breakdown %>%
 
 ```
 
-bflm psvz
+In order to focus on end consumer activity we considered only personal vehicles (category M1) registered by natural persons (retail registrations). While electrification of corporate fleets is expected to contribute to the overall reduciton of transport CO~2~ emissions the behaviour of corporate fleets and vehicles under leasing contracts is a separate problem, infeasible to model based on local socioeconomic variables.
+
+For an illustration consider map of Retail vs. Non-Retail EV penetration (@fig-retail-nonretail), noting the high penetration of EVs in Mladá Boleslav and Rychnov nad Kněžnou; this can be explained better by location of major factories of Škoda Auto (Mladá Boleslav and Kvasiny) than by socioeconomic factors.
 
 ```{r mapa-penetrace}
+#| label: fig-retail-nonretail
+#| fig-cap: Non-retail vs. Retail EV Penetration (log scale)
+#| fig-align: center
+#| fig-height: 3
+#| fig-pos: h
+ 
 registrace_orp <- registrace %>% 
   group_by(KOD_ORP, typ_obchodu, typ, vin) %>% 
   summarise(pocet = n()) %>% 
@@ -182,12 +226,167 @@ registrace_orp <- registrace %>%
             ) %>% 
   ungroup()
   
+orp_chart_src <- orp_polygony() %>% 
+  inner_join(registrace_orp, by = c("KOD_ORP" = "KOD_ORP")) %>% 
+  mutate(typ_obchodu = stringr::str_to_title(typ_obchodu))
 
+ggplot(data = orp_chart_src) +
+  geom_sf(aes(fill = podil_ev),
+          color = NA) +
+  scale_fill_viridis_c(trans = "log10",
+                      labels = scales::percent) +
+  facet_wrap(facets = "typ_obchodu",
+             ncol = 2) +
+  theme_void() +
+  theme(legend.position="bottom") +
+  theme(legend.title = element_blank())
 
 ```
 
+
+
 # Result 
 
+```{r}
+#| label: fig-stepwise
+#| fig-cap: Schwartz's information criterion / stepwise regression
+#| fig-align: center
+#| fig-height: 4
+#| fig-width: 6.5
+#| fig-pos: H
+
+reg_src <- registrace %>% 
+  filter(typ_obchodu == "retail") %>% 
+  group_by(rok_registrace, KOD_ORP, typ) %>% 
+  summarise(pocet = count(vin)) %>% 
+  collect() %>% 
+  pivot_wider(names_from = typ, values_from = pocet, values_fill = 0) %>% 
+  mutate(pct_spalovaci = spalovací / (spalovací + elektro + hybrid)) %>% 
+  mutate(pct_friendly = 1 - pct_spalovaci) %>% 
+  ungroup()
+
+obecni_scitani <- czso::czso_get_table("SLDB-VYBER") %>% 
+  filter(uzcis == 65 | uzkod == '3018') %>% 
+  mutate(uzkod = ifelse(uzkod == '3018', '1000', uzkod)) %>% # Praha jako kraj >> Praha jako ORP
+  # metodika = https://www.czso.cz/documents/10180/25233177/sldb2011_vou.xls
+  select(KOD_ORP = uzkod, 
+         celkem = vse1111, 
+         muzi = vse1112,
+         zeny = vse1113,
+         svobodni = vse1121,
+         zenati = vse1131,
+         rozvedeni = vse1141,
+         ovdoveli = vse1151,
+         plus15 = vse2111, 
+         vs15 = vse2181,
+         zs15 = vse2131,
+         ss15 = vse2151,
+         deti = vse3121,
+         teens = vse3131,
+         twenties = vse3141,
+         thirties = vse3151,
+         fourties = vse3161,
+         fifties = vse3171,
+         six_lo = vse3181,
+         six_hi = vse3191,
+         seventies = vse31101,
+         eighties = vse31111,
+         cesi = vse4121,
+         moravci = vse4131,
+         slezane = vse4141,
+         slovaci = vse4151,
+         nemci = vse4161,
+         polaci = vse4171,
+         romove = vse4181,
+         ukrajinci = vse4191,
+         vietnamci = vse41101,
+         bezverci = vse5121,
+         katolici = vse5141,
+         husite = vse5151,
+         evangelici = vse5161,
+         jehovisti = vse5171,
+         pravoslavni = vse5181,
+         ateisti = vse5191,
+         ek_aktivni = vse6111,
+         zamestnanci = vse6131,
+         icari = vse6151,
+         prdusi = vse6161,
+         matky = vse6173,
+         nezamestnani = vse6181,
+         neprdusi = vse61101,
+         studenti = vse61111) %>% 
+  mutate(across(!KOD_ORP, as.numeric)) %>% # pro vše kromě KOD_ORP: text >> číslo
+  mutate(podil_svobodni = svobodni / plus15, # svobodní z 15+ 
+         podil_vs = vs15 / plus15, # vysokoškoláci z 15+
+         podil_zs = zs15 / plus15, # základní z 15+
+         podil_ss = ss15 / plus15, # středoškoláci z 15+
+         podil_0_14 = deti / celkem, # děti ze všech
+         podil_15_19 = teens / celkem, 
+         podil_20_29 = twenties / celkem,
+         podil_30_39 = thirties / celkem,
+         podil_40_49 = fourties / celkem,
+         podil_50_59 = fifties / celkem,
+         podil_60_69 = (six_hi + six_lo) / celkem,
+         podil_70_79 = seventies / celkem,
+         podil_80_plus = eighties / celkem,
+         podil_ceska = cesi / celkem,
+         podil_moravska = moravci / celkem,
+         podil_slezska = slezane / celkem,
+         podil_slovenska = slovaci / celkem,
+         podil_nemecka = nemci / celkem,
+         podil_romska = romove / celkem,
+         podil_ukrajinska = ukrajinci / celkem,
+         podil_vietnamska = vietnamci / celkem,
+         podil_vira_bez = bezverci / celkem,
+         podil_katolici = katolici / celkem,
+         podil_husite = husite / celkem,
+         podil_evangelici = evangelici / celkem,
+         podil_jehoviste = jehovisti / celkem,
+         podil_pravoslavni = pravoslavni / celkem,
+         podil_ateisti = ateisti / celkem,
+         podil_aktivni = ek_aktivni / plus15, # ekonomicky aktivní z 15+ (děti nebrat!)
+         podil_zam = zamestnanci / ek_aktivni,
+         podil_ico = icari / ek_aktivni,
+         podil_prduch = prdusi / ek_aktivni,
+         podil_matek = matky / ek_aktivni,
+         podil_nezam = nezamestnani / ek_aktivni,
+         podil_neprduch = neprdusi / plus15,
+         podil_studenti = studenti / plus15)
+
+podklad <- RCzechia::orp_polygony() %>% 
+  left_join(reg_src, by = 'KOD_ORP') %>% 
+  left_join(obecni_scitani, by = 'KOD_ORP') %>% 
+  select(pct_friendly, starts_with("podil")) %>% 
+  st_drop_geometry()
+
+# optimalizace podle {leaps} / Cp & BIC
+leaps_model <- leaps::regsubsets(pct_friendly ~ ., 
+                  data = podklad,
+                  nvmax = 15,
+                  nbest = 1)
+
+plot_regsubsets_mod(leaps_model, scale="bic", cex.axis = 0.66)
+
+```
+```{r }
+#| label: tbl-coeffs
+#| tbl-cap: Regression Coefficients
+#| fig-pos: H
+
+reg_model <- lm(pct_friendly ~ podil_vs + podil_20_29 + podil_40_49 + podil_70_79, 
+                  data = podklad)
+
+coef(reg_model) %>% 
+    kable(format = "latex",
+        booktabs = T,
+        align = c("r"),
+        col.names = c("coefficient"),
+        linesep = '') %>% 
+  kable_styling(full_width = F,
+                latex_options = "hold_position") %>% 
+  row_spec(0, bold = T, align = 'c') 
+
+```
 # Discussion
 
 # Conclusion
