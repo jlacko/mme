@@ -1,5 +1,5 @@
 ---
-title: 'Příspěvek na MME 2023'
+title: 'Socioeconomic Determinants of Electric Vehicle Adoption in Czechia'
 abstract: 
   'Abstract text goes here. This template provides necessary styles and examples to produce valid paper for the international conference on Mathematical Methods in Economics organized by Czech Society for Operations Research and collaborating institutions. The submitted paper cannot be longer than six pages including results, figures and references.'
 keywords: 
@@ -81,7 +81,7 @@ plot_regsubsets_mod <- function (x, labels = obj$xnames, main = NULL, scale = c(
     on.exit(par(las = laspar))
     par(las = 2)
     axis(1, at = 1:np, labels = labels, ...) # I modified this line
-    axis(2, at = 1:nmodels, labels = signif(yscale[index], 2))
+    axis(2, at = 1:nmodels, labels = signif(yscale[index], 2), ...)
     if (!is.null(main)) 
         title(main = main)
     box()
@@ -108,7 +108,7 @@ registrace <- tbl(con, 'registrace_pracovni') %>%
 
 # Introduction
 
-Reducing CO~2~ emissions significantly in comparison to 1990 levels is a target of both global @paris16  and regional initiatives @green_deal19. A key factor for achieving this aim is reducing the volume of CO~2~ emissions from transportation @proposal21. This is in line with the contribution transportation related emissions have made to the current stock of CO~2~ in the Earth's atmosphere @cwatch_dex.
+Reducing CO~2~ emissions significantly in comparison to 1990 levels is a target of both global @paris16  and regional initiatives @green_deal19. A key factor for achieving this aim is reducing the volume of CO~2~ emissions from transportation @proposal21. This is in line with the contribution transportation related emissions have made to the current stock of CO~2~ in the Earth's atmosphere.
 
 In order to achieve these aims it will be necessary to significantly reduce the volume of active Interal Combustion Engine (ICE) vehicles on EU roads. While alternatives to personal vehicle ownership such as mass transit and bicycling are certain to be a part of the solution it is unlikely that the current level of vehicle ownership (over 6 million personal vehicles are registered in the Czech Republic alone, a country of 10 million inhabitants @slaba_houst22) could be feasibly reduced to zero.
 
@@ -132,9 +132,9 @@ rocne <- registrace %>%
     elektro = sum(elektro),
     hybrid = sum(hybrid),
     celkem = spalovaci + elektro + hybrid,
-    pct_elektro = elektro / celkem,
-    pct_hybrid = hybrid / celkem,
-    pct_ev = pct_elektro + pct_hybrid
+    podil_elektro = elektro / celkem,
+    podil_hybrid = hybrid / celkem,
+    podil_ev = podil_elektro + podil_hybrid
             ) %>% 
   ungroup()
  
@@ -208,7 +208,7 @@ For an illustration consider map of Retail vs. Non-Retail EV penetration (@fig-r
 #| label: fig-retail-nonretail
 #| fig-cap: Non-retail vs. Retail EV Penetration (log scale)
 #| fig-align: center
-#| fig-height: 4
+#| fig-height: 8
 #| fig-pos: h
  
 registrace_orp <- registrace %>% 
@@ -221,9 +221,9 @@ registrace_orp <- registrace %>%
     elektro = sum(elektro),
     hybrid = sum(hybrid),
     celkem = spalovaci + elektro + hybrid,
-    pct_elektro = elektro / celkem,
-    pct_hybrid = hybrid / celkem,
-    pct_ev = pct_elektro + pct_hybrid
+    podil_elektro = elektro / celkem,
+    podil_hybrid = hybrid / celkem,
+    podil_ev = podil_elektro + podil_hybrid
             ) %>% 
   ungroup()
   
@@ -232,12 +232,12 @@ orp_chart_src <- orp_polygony() %>%
   mutate(typ_obchodu = stringr::str_to_title(typ_obchodu))
 
 ggplot(data = orp_chart_src) +
-  geom_sf(aes(fill = pct_ev),
+  geom_sf(aes(fill = podil_ev),
           color = NA) +
   scale_fill_viridis_c(trans = "log10",
                        labels = scales::percent) +
   facet_wrap(facets = "typ_obchodu",
-             ncol = 2) +
+             nrow = 2) +
   labs(title = "BEVs & Hybrids as share of vehicle registrations",
        caption = paste("M1 vehicle registrations over", min(rocne$rok_registrace), "–",
                        max(rocne$rok_registrace),
@@ -253,13 +253,17 @@ ggplot(data = orp_chart_src) +
 
 ```
 
+For the socio-economic predictors bflm psvz staťák.
 
+Model selection was performed in statistical programming language R @erko using package *leaps* @miller20 for stepwise regression. Bayesian information criterion @schwarz78 was used as primary metric for variable selection.
 
 # Result 
 
 Model vcelku vychází...
 
 ```{r}
+#| message: FALSE
+#| warning: FALSE
 #| label: fig-stepwise
 #| fig-cap: Schwartz's information criterion / stepwise regression
 #| fig-align: center
@@ -273,8 +277,8 @@ reg_src <- registrace %>%
   summarise(pocet = count(vin)) %>% 
   collect() %>% 
   pivot_wider(names_from = typ, values_from = pocet, values_fill = 0) %>% 
-  mutate(pct_spalovaci = spalovací / (spalovací + elektro + hybrid)) %>% 
-  mutate(pct_friendly = 1 - pct_spalovaci) %>% 
+  mutate(podil_spalovaci = spalovací / (spalovací + elektro + hybrid)) %>% 
+  mutate(podil_friendly = 1 - podil_spalovaci) %>% 
   ungroup()
 
 obecni_scitani <- czso::czso_get_table("SLDB-VYBER") %>% 
@@ -328,51 +332,52 @@ obecni_scitani <- czso::czso_get_table("SLDB-VYBER") %>%
          neprdusi = vse61101,
          studenti = vse61111) %>% 
   mutate(across(!KOD_ORP, as.numeric)) %>% # pro vše kromě KOD_ORP: text >> číslo
-  mutate(pct_svobodni = svobodni / plus15, # svobodní z 15+ 
-         pct_vs = vs15 / plus15, # vysokoškoláci z 15+
-         pct_zs = zs15 / plus15, # základní z 15+
-         pct_ss = ss15 / plus15, # středoškoláci z 15+
-         pct_0_14 = deti / celkem, # děti ze všech
-         pct_15_19 = teens / celkem, 
-         pct_20_29 = twenties / celkem,
-         pct_30_39 = thirties / celkem,
-         pct_40_49 = fourties / celkem,
-         pct_50_59 = fifties / celkem,
-         pct_60_69 = (six_hi + six_lo) / celkem,
-         pct_70_79 = seventies / celkem,
-         pct_80_plus = eighties / celkem,
-         pct_ceska = cesi / celkem,
-         pct_moravska = moravci / celkem,
-         pct_slezska = slezane / celkem,
-         pct_slovenska = slovaci / celkem,
-         pct_nemecka = nemci / celkem,
-         pct_romska = romove / celkem,
-         pct_ukrajinska = ukrajinci / celkem,
-         pct_vietnamska = vietnamci / celkem,
-         pct_vira_bez = bezverci / celkem,
-         pct_katolici = katolici / celkem,
-         pct_husite = husite / celkem,
-         pct_evangelici = evangelici / celkem,
-         pct_jehoviste = jehovisti / celkem,
-         pct_pravoslavni = pravoslavni / celkem,
-         pct_ateisti = ateisti / celkem,
-         pct_aktivni = ek_aktivni / plus15, # ekonomicky aktivní z 15+ (děti nebrat!)
-         pct_zam = zamestnanci / ek_aktivni,
-         pct_ico = icari / ek_aktivni,
-         pct_prduch = prdusi / ek_aktivni,
-         pct_matek = matky / ek_aktivni,
-         pct_nezam = nezamestnani / ek_aktivni,
-         pct_neprduch = neprdusi / plus15,
-         pct_studenti = studenti / plus15)
+  mutate(podil_muzi = muzi / celkem,
+         podil_svobodni = svobodni / plus15, # svobodní z 15+ 
+         podil_vs = vs15 / plus15, # vysokoškoláci z 15+
+         podil_zs = zs15 / plus15, # základní z 15+
+         podil_ss = ss15 / plus15, # středoškoláci z 15+
+         podil_0_14 = deti / celkem, # děti ze všech
+         podil_15_19 = teens / celkem, 
+         podil_20_29 = twenties / celkem,
+         podil_30_39 = thirties / celkem,
+         podil_40_49 = fourties / celkem,
+         podil_50_59 = fifties / celkem,
+         podil_60_69 = (six_hi + six_lo) / celkem,
+         podil_70_79 = seventies / celkem,
+         podil_80_plus = eighties / celkem,
+         podil_ceska = cesi / celkem,
+         podil_moravska = moravci / celkem,
+         podil_slezska = slezane / celkem,
+         podil_slovenska = slovaci / celkem,
+         podil_nemecka = nemci / celkem,
+         podil_romska = romove / celkem,
+         podil_ukrajinska = ukrajinci / celkem,
+         podil_vietnamska = vietnamci / celkem,
+         podil_vira_bez = bezverci / celkem,
+         podil_katolici = katolici / celkem,
+         podil_husite = husite / celkem,
+         podil_evangelici = evangelici / celkem,
+         podil_jehoviste = jehovisti / celkem,
+         podil_pravoslavni = pravoslavni / celkem,
+         podil_ateisti = ateisti / celkem,
+         podil_aktivni = ek_aktivni / plus15, # ekonomicky aktivní z 15+ (děti nebrat!)
+         podil_zam = zamestnanci / ek_aktivni,
+         podil_ico = icari / ek_aktivni,
+         podil_prduch = prdusi / ek_aktivni,
+         podil_matek = matky / ek_aktivni,
+         podil_nezam = nezamestnani / ek_aktivni,
+         podil_neprduch = neprdusi / plus15,
+         podil_studenti = studenti / plus15)
 
 podklad <- RCzechia::orp_polygony() %>% 
   left_join(reg_src, by = 'KOD_ORP') %>% 
   left_join(obecni_scitani, by = 'KOD_ORP') %>% 
-  select(pct_friendly, starts_with("pct")) %>% 
-  select(-pct_spalovaci)
+  select(podil_friendly, starts_with("podil")) %>% 
+  select(-podil_spalovaci)
 
 # optimalizace podle {leaps} / Cp & BIC
-leaps_model <- leaps::regsubsets(pct_friendly ~ ., 
+leaps_model <- leaps::regsubsets(podil_friendly ~ ., 
                   data = st_drop_geometry(podklad),
                   nvmax = 15,
                   nbest = 1)
@@ -385,8 +390,8 @@ plot_regsubsets_mod(leaps_model, scale="bic", cex.axis = 0.66)
 #| tbl-cap: Regression Coefficients
 #| fig-pos: H
 
-reg_model <- lm(pct_friendly ~ pct_vs + pct_ss + pct_20_29 +
-                  pct_30_39 + pct_40_49, 
+reg_model <- lm(podil_friendly ~ podil_vs + podil_ss + podil_20_29 +
+                  podil_30_39 + podil_40_49, 
                   data = st_drop_geometry(podklad))
 
 coef(reg_model) %>% 
@@ -401,7 +406,7 @@ coef(reg_model) %>%
 
 ```
 
-On one hand th R^2^ statistic is `r prettynum(summary(reg_model)$r.squared)`, meaning our model does not explain *that* much of the variance observed. 
+On one hand th R^2^ statistic is `r prettynum(summary(reg_model)$r.squared)`, meaning our model does fully explain the variance observed. 
 
 On the other hand F the statistic `r prettynum(summary(reg_model)$fstatistic["value"])`, indicating a highly significant relationship.
 
@@ -412,7 +417,7 @@ podklad$resids <- reg_model$residuals
 podklad$fitted <- reg_model$fitted.values
 
 # původní hodnoty - raw
-orig_moran <- global_moran_test(podklad$pct_friendly,
+orig_moran <- global_moran_test(podklad$podil_friendly,
              nb = st_contiguity(podklad$geometry, queen = F),
              wt = st_weights(st_contiguity(podklad$geometry, queen = F)))
 
@@ -422,10 +427,18 @@ resids_moran <- global_moran_test(podklad$resids,
              wt = st_weights(st_contiguity(podklad$geometry, queen = F)))
 
 ```
+The original data of retail EV penetration showed high degree of spatial dependence, using `r orig_moran$method`, as defined in @bivand_pebesma23. The Moran's I metric being defined as:
 
-The original data of retail EV penetration showed high degree of spatial dependence, as measured by `r orig_moran$method`. The value of Moran's I statistic was `r orig_moran$statistic`, with p-value `r orig_moran$p.value`.
+$$
+I = \frac{n}{S_0}  \frac{\sum_{i=1}^N\sum_{j=1}^N w_{ij}(x_i - \bar{x})(x_j - \bar{x})}{\sum_{i=1}^N (x_i - \bar{x})^2}
+$$
+where $x_i, i = 1, ..., n$ are $n$ observations, $w_{ij}$ are the spatial weights and $S_0$ is the sum of spatial weights $\sum_{i, j=1}^N w_{ij}$.
 
-On the other hand residuals after condidering the socioeconimic predictors showed much less spatial dependence, with Moran's I `r resids_moran$statistic`, with p-value `r resids_moran$p.value`.
+The value of Moran's I statistic of Retail EV penetration was calculated via package *sfdep*  @parry23, using rook neighborhood definition for determining the adjacency matrix of individual ORPs. 
+
+The observed value of Moran's I statistic for raw EV penetration was `r orig_moran$statistic`, with p-value `r orig_moran$p.value`, indicating a strong spatial autocorrelation.
+
+On the other hand residuals after condidering the socioeconimic predictor model showed much less spatial dependence, with Moran's I `r resids_moran$statistic`. This implies p-value `r resids_moran$p.value`, leading us to reject a hypotesis of spatial autocorelation of model residuals. In its effect the socioeconomic model has removed the observed autocorrelation.
 
 # Discussion
 
