@@ -5,9 +5,9 @@ abstract:
 keywords: 
   'Battery electric vehicles, Hybrid vehicles, Technology adoption and diffusion, Czechia'
 JEL:
-    'zde budiž jel klasifikace'
+    'Q54, C31'
 AMS:
-    'zde budiž ams klasifikace'
+    '62M30'
 author: 'Jindra Lacko'
 affiliation: 'Vysoká škola ekonomická v Praze / Katedra Ekonometrie'
 email: 'jindra.lacko@vse.cz'
@@ -468,6 +468,8 @@ While our model did not explain the observed differences in EV adoption over Cze
 The work was supported by the Prague University of Economics and Business project IGS  24/2023.
 
 # References
+
+\hfill
 
 ```{r finally}
 
