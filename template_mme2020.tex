@@ -25,11 +25,8 @@
 % math operator for variance
 \DeclareMathOperator\var{var}
 
-\usepackage[setpagesize=false, 
-            unicode=false, 
-            colorlinks=true, 
-            urlcolor=blue, 
-            linkcolor=black]{hyperref} 
+\usepackage[hidelinks]{hyperref} 
+\urlstyle{same}
 
 $if(csl-refs)$
 \newlength{\cslhangindent}
@@ -47,7 +44,7 @@ $if(csl-refs)$
 % \def\par{\hangindent=\cslhangindent\oldpar}
   \fi
   % set entry spacing
-  \setlength{\parskip}{6pt}
+  \setlength{\parskip}{0pt}
  }%
  {}
 \usepackage{calc}
