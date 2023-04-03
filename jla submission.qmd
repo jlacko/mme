@@ -13,7 +13,7 @@ affiliation: 'Vysoká škola ekonomická v Praze / Katedra Ekonometrie'
 email: 'jindra.lacko@vse.cz'
 format: 
   pdf:
-    keep-tex: true
+    keep-tex: false
 knitr:
   opts_chunk: 
     fig.showtext: true
@@ -110,7 +110,7 @@ registrace <- tbl(con, 'registrace_pracovni') %>%
 
 Reducing CO~2~ emissions significantly in comparison to 1990 levels is a target of both global @paris16  and regional initiatives @green_deal19. A key factor for achieving this aim is reducing the volume of CO~2~ emissions from transportation @proposal21. This is in line with the contribution transportation related emissions have made to the current stock of CO~2~ in the Earth's atmosphere.
 
-In order to achieve these aims it will be necessary to significantly reduce the volume of active Interal Combustion Engine (ICE) vehicles on EU roads. While alternatives to personal vehicle ownership such as mass transit and bicycling are certain to be a part of the solution it is unlikely that the current level of vehicle ownership (over 6 million personal vehicles are registered in the Czech Republic alone, a country of 10 million inhabitants @slaba_houst22) could be feasibly reduced to zero.
+In order to achieve these aims it will be necessary to significantly reduce the volume of active Internal Combustion Engine (ICE) vehicles on EU roads. While alternatives to personal vehicle ownership such as mass transit and bicycling are certain to be a part of the solution it is unlikely that the current level of vehicle ownership (over 6 million personal vehicles are registered in the Czech Republic alone, a country of 10 million inhabitants @slaba_houst22) could be feasibly reduced to zero.
 
 As a consequence any plan to reduce and / or eliminate ICE personal vehicle ownership and use must include introducing of alternatives, such as Electric Vehicles (EV's).
 
@@ -140,11 +140,11 @@ rocne <- registrace %>%
  
 ```
 
-The data were collected from the Czech Ministry of Transport Open Data @registr monthly snapshots. For the purpose of our analysis the only registrations from years `r min(rocne$rok_registrace)` to `r max(rocne$rok_registrace)` were used. 
+The data were collected from the Czech Ministry of Transport Open Data @registr monthly snapshots. For the purpose of our analysis only registrations from years `r min(rocne$rok_registrace)` to `r max(rocne$rok_registrace)` were used. 
 
 We selected only personal vehicles, defined as M1 category in the relevant regulation @vyhlaska341. Vehicle registrations in this category were further split into retail segment, defined as vehicle registrations by natural persons, and non-retail segment, defined as vehicle registrations by companies. The retail segment also includes personal vehicles operated by natural persons under leasing contracts.
 
-The definition of  for a detailed breakdown over brands and models see @tbl-models.
+Detailed breakdown of EV over brands and models is presented in @tbl-models.
 
 ```{r models}
 #| label: tbl-models
@@ -197,9 +197,9 @@ model_breakdown %>%
 
 ```
 
-In order to model consumer activity we focused on retail registrations. While electrification of corporate fleets is expected to materially contribute to the overall reduction of transport CO~2~ emissions the behaviour of corporate fleets is best understood as a separate problem, infeasible to model based on local socioeconomic variables.
+In order to model consumer activity we focused on retail registrations. Electrification of corporate fleets is expected to contribute materially to the overall reduction of transport CO~2~ emissions the behavior of corporate fleets, but it is best understood as a separate problem, impractical to model based on local socioeconomic variables.
 
-For an illustration consider map of Retail vs. Non-Retail EV penetration (@fig-retail-nonretail), noting the high penetration of EV registrations in Mladá Boleslav and Vrchlabí; these can be explained better as location of facilities of Škoda Auto than as result of socioeconomic factors.
+For a deeper illustration consider comparison of Retail vs. Non-Retail EV penetration (@fig-retail-nonretail), noting the high penetration of EV registrations in Mladá Boleslav and Vrchlabí; these can be explained better as location of facilities of Škoda Auto than as output of local socioeconomic factors.
 
 ```{r mapa-penetrace}
 #| label: fig-retail-nonretail
@@ -250,22 +250,22 @@ ggplot(data = orp_chart_src) +
 
 ```
 
-For the socioeconomic predictors we used results of the previous (2011) census @vysledky11; the results of the 2021 census were not available at the time of writing in the necessary level of detail. The census data were processed from the Statistial Office API via *czso* package @bouchal22.
+For the socioeconomic predictors we used results of the previous (2011) census @vysledky11; the results of the 2021 census were not available at the time of writing in necessary level of detail. The census data were accessed from the Statistical Office API using *czso* package @bouchal22.
 
-Data processing and modelling was done in statistical programming language R @erko. Variable selection was performed using package *leaps* @miller20 for stepwise regression. Bayesian information criterion @schwarz78 was used as primary metric for variable selection.
+Data processing and modelling was done in statistical programming language R @erko. Modelling was performed using package *leaps* @miller20 for stepwise regression. Bayesian information criterion @schwarz78 was used as primary metric for variable selection.
 
-The vehicle registration dataset provides spatial detail at level of municipalities with extended powers (ORP). Given that the population of the `r nrow(RCzechia::orp_polygony())` Czech ORPs varies by several orders of magnitude (from more than a million in Prague to less than 10 thousands in Pacov or Králíky) it was impractical to model registrations as absolute figures. 
+The vehicle registration dataset provides spatial breakdown to the level of municipalities with extended powers (ORP). Given that the population of the `r nrow(RCzechia::orp_polygony())` Czech ORPs varies by several orders of magnitude (from more than a million in Prague to less than 10 thousands in Pacov or Králíky) it was impractical to model registrations as absolute figures. 
 
 Instead relative penetration was used – EV registration as percentage of total personal vehicle registration. Likewise socioeconomic predictors were normalized by population of the ORP.
 
-Spatial information of the ORPs was obtained using package *RCzechia* @lacko23. Spatial autocorellation of EV penetration at ORP level was measured using Moran's I statistic, as defined in @bivand_pebesma23. 
+Spatial information regarding the ORPs was obtained using package *RCzechia* @lacko23. Spatial autocorrelation of EV penetration at ORP level was measured using Moran's I statistic, as defined in @bivand_pebesma23. 
 
 $$
 I = \frac{n \times \sum_{i=1}^n\sum_{j=1}^n w_{ij}(x_i - \bar{x})(x_j - \bar{x})}{S_0 \times \sum_{i=1}^n (x_i - \bar{x})^2}
 $$
 where $x_i, i = 1, ..., n$ are the $n$ observations, $w_{ij}$ are the spatial weights and $S_0$ is the sum of spatial weights $\sum_{i, j=1}^n w_{ij}$.
 
-The actualal value of Moran's I statistic of Retail EV penetration was calculated via package *sfdep*  @parry23, using rook neighborhood definition for determining the adjacency matrix of individual ORPs. 
+The value of the Moran's I statistic of Retail EV penetration was calculated via package *sfdep*  @parry23, using rook neighborhood definition for determining the adjacency matrix of individual ORPs. 
 
 # Result 
 
@@ -441,27 +441,27 @@ resids_moran <- global_moran_test(podklad$resids,
              wt = st_weights(st_contiguity(podklad$geometry, queen = F)))
 
 ```
-The original data of retail EV penetration showed high degree of spatial autocorellation as calculated using `r orig_moran$method`. The observed value of Moran's I statistic for EV penetration was `r orig_moran$statistic`, indicating a significant autocorrelation at p-value `r orig_moran$p.value`.
+The original data of retail EV penetration showed high degree of spatial autocorrelation as calculated using `r orig_moran$method`. The observed value of Moran's I statistic for EV penetration was `r orig_moran$statistic`, indicating a significant autocorrelation at p-value `r orig_moran$p.value`.
 
-The same statistic calculated for residuals after linear modelling for the `r length(names(coef(leaps_model, which.min(summary(leaps_model)$bic)))[-1])` socioeconimic predictors showed much less spatial dependence, with Moran's I at `r resids_moran$statistic`. This implies p-value `r resids_moran$p.value`, leading us to reject a hypotesis of spatial autocorelation of model residuals. 
+The same statistic calculated for residuals after linear modelling for the `r length(names(coef(leaps_model, which.min(summary(leaps_model)$bic)))[-1])` socioeconomic predictors showed much less spatial dependence, with Moran's I at `r resids_moran$statistic`. This implies p-value `r resids_moran$p.value`, leading us to reject a hypothesis of spatial autocorrelation of model residuals. 
 
 Thus the socioeconomic model has removed the observed autocorrelation from EV penetration data, leaving only random effect.
 
 # Discussion
 
-The coefficients identified via stepwise selection in @tbl-coeffs can be split into two groups: the first related to education - with the share of population with tertiary education leading to higher EV penetration, and share of population with secondary education only leading to lower EV pentration.
+The coefficients identified via stepwise selection in @tbl-coeffs can be split into two groups: the first related to education - with the share of population with tertiary education leading to higher EV penetration, and share of population with secondary education only leading to lower EV penetration.
 
-The second group relates to age structure: share of population in early productive age (20–29 years) drives EV adoption down, and share of population in mid to late productive age (30–39 and 40–49) drives EV adoption up.
+The second group relates to age structure: share of population in early productive age (20–29 years) drives EV adoption down, and share of population in middle to upper middle productive age (30–39 and 40–49) drives EV adoption up.
 
-Other socioeconomic factors, including those related to employment status, nationality and religion, did not have a significant effect on EV adoption as measured by the BIC criteron.
+Other socioeconomic factors, including those related to employment status, nationality and religion, did not have a significant effect on EV adoption as measured by the BIC criterion.
 
-A possible common theme behind the two identified groups of socioeconomic predictors identified is income. While income was not one of the census variables considered it is known to correlate with both education level and age @struktura21 – with average wages increasing with education, and peaking in the 40 to 44 age bracket.
+A possible common theme behind the two groups of socioeconomic predictors identified is income. While average income was not one of the census variables considered it is known to correlate with both education level and age @struktura21 – with average wages increasing with education, and peaking in the 40 to 44 age bracket.
 
 # Conclusion
 
-We propose a model explaining the rate of adoption of Electric Vehicles in the Czech Republic retail segment based on socioeconomic predictors at ORP level. The model identified 5 significant predictors (two related to education, and three related to age structure). The identified predictors are variables known to correlate with income. 
+We propose a model explaining the rate of adoption of Electric Vehicles in the Czech Republic retail segment based on socioeconomic predictors at ORP level. The model identified 5 significant predictors (two related to education, and three related to age structure). The identified predictors are variables known to correlate with personal income. 
 
-While our model did not explain the observed differences in EV adoption over Czech ORPs fully it removed the effect of spatial autocorelation from the data, leaving only random residuals.
+While our model did not explain the observed differences in EV adoption over Czech ORPs fully, it did remove the effect of spatial autocorrelation from the data, leaving only random residuals.
 
 # Acknowledgement
 
