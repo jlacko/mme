@@ -1,19 +1,19 @@
 ---
-title: 'Socioeconomic Determinants of Electric Vehicle Adoption in Czechia'
+title: "Socioeconomic Determinants of Electric Vehicle Adoption in Czechia"
 abstract: 
-  'Abstract text goes here. This template provides necessary styles and examples to produce valid paper for the international conference on Mathematical Methods in Economics organized by Czech Society for Operations Research and collaborating institutions. The submitted paper cannot be longer than six pages including results, figures and references.'
+  "The EU and the Czech Republic aim to reduce transport related CO~2~ emissions compared to 1990 level; a key enabler of this endeavor is expected to be replacement of internal combustion engines by battery operated and hybrid propulsion vehicles. We investigate vehicle registration data in retail segment over the years 2019 to 2022 using stepwise linear regression technique and propose a model explaining rate of adoption of electric vehicles based on 37 socioeconomic predictors observed in 206 Czech administrative areas. Our model finds 5 significant predictors, displays a solid goodness of fit and removes spatial autocorrelation observed in original data."
 keywords: 
-  'Battery electric vehicles, Hybrid vehicles, Technology adoption and diffusion, Czechia'
+  "Battery electric vehicles, Hybrid vehicles, Technology adoption and diffusion, Czechia"
 JEL:
-    'Q54, C31'
+    "Q54, C31"
 AMS:
-    '62M30'
-author: 'Jindra Lacko'
-affiliation: 'Vysoká škola ekonomická v Praze / Katedra Ekonometrie'
-email: 'jindra.lacko@vse.cz'
+    "62M30"
+author: "Jindra Lacko"
+affiliation: "Vysoká škola ekonomická v Praze / Katedra Ekonometrie"
+email: "jindra.lacko@vse.cz"
 format: 
   pdf:
-    keep-tex: false
+    keep-tex: true
 knitr:
   opts_chunk: 
     fig.showtext: true
@@ -24,11 +24,11 @@ execute:
   message: false
   warning: false
 template:
-  'template_mme2020.tex'
+  "template_mme2020.tex"
 bibliography:
-  'references.bib'
+  "references.bib"
 csl: 
-  'ieee.csl'
+  "ieee.csl"
 ---
 
 ```{r setup}
@@ -99,190 +99,10 @@ library(kableExtra)
 
 con <- DBI::dbConnect(RSQLite::SQLite(), "~/Documents/elektroauta/data/auta.sqlite") # připojit databázi
 
-registrace <- tbl(con, 'registrace_pracovni') %>% 
-  filter(rok_registrace >= '2019' 
-         & rok_registrace <= '2022'
+registrace <- tbl(con, "registrace_pracovni") %>% 
+  filter(rok_registrace >= "2019" 
+         & rok_registrace <= "2022"
          & kategorie == "M1")
-
-```
-
-# Introduction
-
-Reducing CO~2~ emissions significantly in comparison to 1990 levels is a target of both global @paris16  and regional initiatives @green_deal19. A key factor for achieving this aim is reducing the volume of CO~2~ emissions from transportation @proposal21. This is in line with the contribution transportation related emissions have made to the current stock of CO~2~ in the Earth's atmosphere.
-
-In order to achieve these aims it will be necessary to significantly reduce the volume of active Internal Combustion Engine (ICE) vehicles on EU roads. While alternatives to personal vehicle ownership such as mass transit and bicycling are certain to be a part of the solution it is unlikely that the current level of vehicle ownership (over 6 million personal vehicles are registered in the Czech Republic alone, a country of 10 million inhabitants @slaba_houst22) could be feasibly reduced to zero.
-
-As a consequence any plan to reduce and / or eliminate ICE personal vehicle ownership and use must include introducing of alternatives, such as Electric Vehicles (EV's).
-
-A number of studies was performed to evaluate the effectiveness of incentives in reducing ICE and promoting EV vehicle ownership. These were mostly focused on United States @jenn_etal18, @hardman_etal18. In the European context important data come from Norway (global leader in EV adoption) @kester_etal18, @schulz_rode22. In Central Europe a review was performed of Polish customer preferences @scasny_etal18, @bryla_etal22. 
-
-In this article we present a study of adoption of EVs in the Czech Republic administrative areas, as explained by socioeconomic characteristic of these regions.
-
-# Methodology
-
-```{r summary}
-
-rocne <- registrace %>% 
-  group_by(rok_registrace, typ_obchodu, typ)  %>%
-  summarise(pocet = n()) %>% 
-  collect() %>% 
-  pivot_wider(names_from = typ, values_from = pocet, values_fill = 0) %>% 
-  summarise(
-    spalovaci = sum(spalovací),
-    elektro = sum(elektro),
-    hybrid = sum(hybrid),
-    celkem = spalovaci + elektro + hybrid,
-    podil_elektro = elektro / celkem,
-    podil_hybrid = hybrid / celkem,
-    podil_ev = podil_elektro + podil_hybrid
-            ) %>% 
-  ungroup()
- 
-```
-
-The data were collected from the Czech Ministry of Transport Open Data @registr monthly snapshots. For the purpose of our analysis only registrations from years `r min(rocne$rok_registrace)` to `r max(rocne$rok_registrace)` were used. 
-
-We selected only personal vehicles, defined as M1 category in the relevant regulation @vyhlaska341. Vehicle registrations in this category were further split into retail segment, defined as vehicle registrations by natural persons, and non-retail segment, defined as vehicle registrations by companies. The retail segment also includes personal vehicles operated by natural persons under leasing contracts.
-
-Detailed breakdown of EV over brands and models is presented in @tbl-models.
-
-```{r models}
-#| label: tbl-models
-#| tbl-cap: Model Breakdown
-
-model_breakdown <- registrace %>% 
-  filter(typ != "spalovací") %>% 
-  select(typ_obchodu, tovarni_znacka, obchodni_oznaceni, vin) %>% 
-  collect()
-
-vyznamne_znacky <- model_breakdown %>%
-  group_by(tovarni_znacka) %>% 
-  tally() %>%
-  filter(n > 50) %>% 
-  pull(tovarni_znacka)
-
-model_breakdown <- model_breakdown %>% 
-  mutate(mod_znacka = case_when(tovarni_znacka %in% vyznamne_znacky ~ tovarni_znacka,
-                                T ~ "other brands")) %>% 
-  mutate(mod_znacka = fct_infreq(mod_znacka)) %>% 
-  mutate(mod_znacka = fct_relevel(mod_znacka, "other brands", after = Inf)) %>% 
-  pivot_wider(names_from = typ_obchodu, 
-              values_from = vin,
-              values_fn = list(vin = length),
-              values_fill = 0) %>% 
-  mutate(mod_oznaceni = case_when(retail + `non-retail` < 15 ~ "other models",
-                                  !mod_znacka %in% vyznamne_znacky ~ "other models",
-                                  TRUE ~ obchodni_oznaceni)) %>% 
-  group_by(mod_znacka, mod_oznaceni) %>% 
-  summarise(retail = sum(retail),
-            non_retail = sum(`non-retail`)) %>% 
-  arrange(desc(retail + non_retail), .by_group = T) %>% 
-  bind_rows(tibble(mod_znacka = '',
-                   mod_oznaceni = '',
-                   retail = sum(.$retail),
-                   non_retail = sum(.$non_retail))) %>% 
-  mutate(retail = prettynum(retail),
-         non_retail = prettynum(non_retail))
-  
-model_breakdown %>%   
-  kable(format = "latex",
-        booktabs = T,
-        align = c("l", "l", "r", "r"),
-        col.names = c("Brand", "Model", "Retail", "Non-Retail"),
-        linesep = '') %>% 
-  kable_styling(full_width = F,
-                latex_options = "hold_position") %>% 
-  row_spec(0, bold = T, align = 'c') %>% 
-  row_spec(nrow(model_breakdown)-1, hline_after = T)
-
-```
-
-In order to model consumer activity we focused on retail registrations. Electrification of corporate fleets is expected to contribute materially to the overall reduction of transport CO~2~ emissions the behavior of corporate fleets, but it is best understood as a separate problem, impractical to model based on local socioeconomic variables.
-
-For a deeper illustration consider comparison of Retail vs. Non-Retail EV penetration (@fig-retail-nonretail), noting the high penetration of EV registrations in Mladá Boleslav and Vrchlabí; these can be explained better as location of facilities of Škoda Auto than as output of local socioeconomic factors.
-
-```{r mapa-penetrace}
-#| label: fig-retail-nonretail
-#| fig-cap: Non-retail vs. Retail EV Penetration (log scale) in Czech ORPs (n = 206)
-#| fig-align: center
-#| fig-height: 8
-#| fig-pos: 'H'
- 
-registrace_orp <- registrace %>% 
-  group_by(KOD_ORP, typ_obchodu, typ, vin) %>% 
-  summarise(pocet = n()) %>% 
-  collect() %>% 
-  pivot_wider(names_from = typ, values_from = pocet, values_fill = 0) %>% 
-  summarise(
-    spalovaci = sum(spalovací),
-    elektro = sum(elektro),
-    hybrid = sum(hybrid),
-    celkem = spalovaci + elektro + hybrid,
-    podil_elektro = elektro / celkem,
-    podil_hybrid = hybrid / celkem,
-    podil_ev = podil_elektro + podil_hybrid
-            ) %>% 
-  ungroup()
-  
-orp_chart_src <- orp_polygony() %>% 
-  inner_join(registrace_orp, by = c("KOD_ORP" = "KOD_ORP")) %>% 
-  mutate(typ_obchodu = stringr::str_to_title(typ_obchodu))
-
-ggplot(data = orp_chart_src) +
-  geom_sf(aes(fill = podil_ev),
-          color = NA) +
-  scale_fill_viridis_c(trans = "log10",
-                       labels = scales::percent) +
-  facet_wrap(facets = "typ_obchodu",
-             nrow = 2) +
-  labs(title = "BEVs & Hybrids as share of vehicle registrations",
-       caption = paste("M1 vehicle registrations for years", min(rocne$rok_registrace), "–",
-                       max(rocne$rok_registrace),
-                       "\nsource: https://www.mdcr.cz/Statistiky/Silnicni-doprava/Centralni-registr-vozidel")) +
-  theme_void() +
-  theme(legend.position="bottom",
-        legend.title = element_blank(),
-        plot.title = element_text(hjust = 0.5,
-                                  margin = margin(0,0,15,0)),
-        plot.caption = element_text(face = "italic"),
-        legend.margin = margin(0,10,10,0)
-        )
-
-```
-
-For the socioeconomic predictors we used results of the previous (2011) census @vysledky11; the results of the 2021 census were not available at the time of writing in necessary level of detail. The census data were accessed from the Statistical Office API using *czso* package @bouchal22.
-
-Data processing and modelling was done in statistical programming language R @erko. Modelling was performed using package *leaps* @miller20 for stepwise regression. Bayesian information criterion @schwarz78 was used as primary metric for variable selection.
-
-The vehicle registration dataset provides spatial breakdown to the level of municipalities with extended powers (ORP). Given that the population of the `r nrow(RCzechia::orp_polygony())` Czech ORPs varies by several orders of magnitude (from more than a million in Prague to less than 10 thousands in Pacov or Králíky) it was impractical to model registrations as absolute figures. 
-
-Instead relative penetration was used – EV registration as percentage of total personal vehicle registration. Likewise socioeconomic predictors were normalized by population of the ORP.
-
-Spatial information regarding the ORPs was obtained using package *RCzechia* @lacko23. Spatial autocorrelation of EV penetration at ORP level was measured using Moran's I statistic, as defined in @bivand_pebesma23. 
-
-$$
-I = \frac{n \times \sum_{i=1}^n\sum_{j=1}^n w_{ij}(x_i - \bar{x})(x_j - \bar{x})}{S_0 \times \sum_{i=1}^n (x_i - \bar{x})^2}
-$$
-where $x_i, i = 1, ..., n$ are the $n$ observations, $w_{ij}$ are the spatial weights and $S_0$ is the sum of spatial weights $\sum_{i, j=1}^n w_{ij}$.
-
-The value of the Moran's I statistic of Retail EV penetration was calculated via package *sfdep*  @parry23, using rook neighborhood definition for determining the adjacency matrix of individual ORPs. 
-
-# Result 
-
-During the period in question total of `r prettynum(sum(rocne$spalovaci) + sum(rocne$elektro) + sum(rocne$hybrid))` personal vehicles were registered, of which `r prettynum(sum(rocne$elektro) + sum(rocne$hybrid))` could be considered EV's (`r prettynum(sum(rocne$elektro))` battery operated EVs and `r prettynum(sum(rocne$hybrid))` hybrid EVs).
-
-Majority of the EV registrations come from the non-retail segment: `r prettynum(sum(subset(rocne, typ_obchodu == "non-retail")$elektro) + sum(subset(rocne, typ_obchodu == "non-retail")$hybrid))` registrations. Compared to this the retail segment had only `r prettynum(sum(subset(rocne, typ_obchodu == "retail")$elektro) + sum(subset(rocne, typ_obchodu == "retail")$hybrid))` registrations, which is `r prettyprc((sum(subset(rocne, typ_obchodu == "retail")$elektro) + sum(subset(rocne, typ_obchodu == "retail")$hybrid)) / (sum(rocne$elektro)+sum(rocne$hybrid)))` of total EV registrations over the period in consideration.
-
-
-```{r}
-#| message: FALSE
-#| warning: FALSE
-#| label: fig-stepwise
-#| fig-cap: Schwartz's information criterion / stepwise regression
-#| fig-align: center
-#| fig-height: 4
-#| fig-width: 6.5
-#| fig-pos: 'H'
 
 reg_src <- registrace %>% 
   filter(typ_obchodu == "retail") %>% 
@@ -290,13 +110,13 @@ reg_src <- registrace %>%
   summarise(pocet = count(vin)) %>% 
   collect() %>% 
   pivot_wider(names_from = typ, values_from = pocet, values_fill = 0) %>% 
-  mutate(podil_spalovaci = spalovací / (spalovací + elektro + hybrid)) %>% 
-  mutate(podil_friendly = 1 - podil_spalovaci) %>% 
+  mutate(share_spalovaci = spalovací / (spalovací + elektro + hybrid)) %>% 
+  mutate(share_friendly = 1 - share_spalovaci) %>% 
   ungroup()
 
 obecni_scitani <- czso::czso_get_table("SLDB-VYBER") %>% 
-  filter(uzcis == 65 | uzkod == '3018') %>% 
-  mutate(uzkod = ifelse(uzkod == '3018', '1000', uzkod)) %>% # Praha jako kraj >> Praha jako ORP
+  filter(uzcis == 65 | uzkod == "3018") %>% 
+  mutate(uzkod = ifelse(uzkod == "3018", "1000", uzkod)) %>% # Praha jako kraj >> Praha jako ORP
   # metodika = https://www.czso.cz/documents/10180/25233177/sldb2011_vou.xls
   select(KOD_ORP = uzkod, 
          celkem = vse1111, 
@@ -345,55 +165,237 @@ obecni_scitani <- czso::czso_get_table("SLDB-VYBER") %>%
          neprdusi = vse61101,
          studenti = vse61111) %>% 
   mutate(across(!KOD_ORP, as.numeric)) %>% # pro vše kromě KOD_ORP: text >> číslo
-  mutate(podil_muzi = muzi / celkem,
-         podil_svobodni = svobodni / plus15, # svobodní z 15+ 
-         podil_vs = vs15 / plus15, # vysokoškoláci z 15+
-         podil_zs = zs15 / plus15, # základní z 15+
-         podil_ss = ss15 / plus15, # středoškoláci z 15+
-         podil_0_14 = deti / celkem, # děti ze všech
-         podil_15_19 = teens / celkem, 
-         podil_20_29 = twenties / celkem,
-         podil_30_39 = thirties / celkem,
-         podil_40_49 = fourties / celkem,
-         podil_50_59 = fifties / celkem,
-         podil_60_69 = (six_hi + six_lo) / celkem,
-         podil_70_79 = seventies / celkem,
-         podil_80_plus = eighties / celkem,
-         podil_ceska = cesi / celkem,
-         podil_moravska = moravci / celkem,
-         podil_slezska = slezane / celkem,
-         podil_slovenska = slovaci / celkem,
-         podil_nemecka = nemci / celkem,
-         podil_romska = romove / celkem,
-         podil_ukrajinska = ukrajinci / celkem,
-         podil_vietnamska = vietnamci / celkem,
-         podil_vira_bez = bezverci / celkem,
-         podil_katolici = katolici / celkem,
-         podil_husite = husite / celkem,
-         podil_evangelici = evangelici / celkem,
-         podil_jehoviste = jehovisti / celkem,
-         podil_pravoslavni = pravoslavni / celkem,
-         podil_ateisti = ateisti / celkem,
-         podil_aktivni = ek_aktivni / plus15, # ekonomicky aktivní z 15+ (děti nebrat!)
-         podil_zam = zamestnanci / ek_aktivni,
-         podil_ico = icari / ek_aktivni,
-         podil_prduch = prdusi / ek_aktivni,
-         podil_matek = matky / ek_aktivni,
-         podil_nezam = nezamestnani / ek_aktivni,
-         podil_neprduch = neprdusi / plus15,
-         podil_studenti = studenti / plus15)
+  mutate(share_male = muzi / celkem,
+         share_unmarried = svobodni / plus15, # svobodní z 15+ 
+         share_tertiary = vs15 / plus15, # vysokoškoláci z 15+
+         share_primary = zs15 / plus15, # základní z 15+
+         share_secondary = ss15 / plus15, # středoškoláci z 15+
+         share_0_14 = deti / celkem, # děti ze všech
+         share_15_19 = teens / celkem, 
+         share_20_29 = twenties / celkem,
+         share_30_39 = thirties / celkem,
+         share_40_49 = fourties / celkem,
+         share_50_59 = fifties / celkem,
+         share_60_69 = (six_hi + six_lo) / celkem,
+         share_70_79 = seventies / celkem,
+         share_80_plus = eighties / celkem,
+         share_czech = cesi / celkem,
+         share_moravian = moravci / celkem,
+         share_silesian = slezane / celkem,
+         share_slovak = slovaci / celkem,
+         share_german = nemci / celkem,
+         share_roma = romove / celkem,
+         share_ukrainians = ukrajinci / celkem,
+         share_vietnam = vietnamci / celkem,
+         share_faith_no_more = bezverci / celkem,
+         share_catholics = katolici / celkem,
+         share_hussite = husite / celkem,
+         share_evangelicas = evangelici / celkem,
+         share_witnesses = jehovisti / celkem,
+         share_orthodox = pravoslavni / celkem,
+         share_atheists = ateisti / celkem,
+         share_econ_active = ek_aktivni / plus15, 
+         share_employed = zamestnanci / plus15,
+         share_self_employed = icari / plus15,
+         share_working_retired = prdusi / plus15,
+         share_non_working_retired = neprdusi / plus15,
+         share_maternity_leave = matky / plus15,
+         share_unemployed = nezamestnani / plus15,
+         share_students = studenti / plus15)
 
 podklad <- RCzechia::orp_polygony() %>% 
-  left_join(reg_src, by = 'KOD_ORP') %>% 
-  left_join(obecni_scitani, by = 'KOD_ORP') %>% 
-  select(podil_friendly, starts_with("podil")) %>% 
-  select(-podil_spalovaci)
+  left_join(reg_src, by = "KOD_ORP") %>% 
+  left_join(obecni_scitani, by = "KOD_ORP") %>% 
+  select(share_friendly, starts_with("share_")) %>% 
+  select(-share_spalovaci)
 
 # optimalizace podle {leaps} / Cp & BIC
-leaps_model <- leaps::regsubsets(podil_friendly ~ ., 
+leaps_model <- leaps::regsubsets(share_friendly ~ ., 
                   data = st_drop_geometry(podklad),
                   nvmax = 15,
                   nbest = 1)
+
+
+```
+
+# Introduction
+
+Reducing CO~2~ emissions significantly in comparison to 1990 levels is a target of both global @paris16  and regional initiatives @green_deal19. A key factor for achieving this aim is reducing the volume of CO~2~ emissions from transportation @proposal21. This is in line with the contribution transportation related emissions have made to the current stock of CO~2~ in the Earth's atmosphere. In order to achieve these aims it will be necessary to significantly reduce the volume of active Internal Combustion Engine (ICE) vehicles on EU roads. While alternatives to personal vehicle ownership such as mass transit and bicycling are certain to be a part of the solution it is unlikely that the current level of vehicle ownership (over 6 million personal vehicles are registered in the Czech Republic alone, a country of 10 million inhabitants @slaba_houst22) could be feasibly reduced to zero.
+
+As a consequence any plan to reduce and / or eliminate ICE personal vehicle ownership and use must include introducing of alternatives, such as Electric Vehicles (EV's). A number of studies was performed to evaluate the effectiveness of incentives in reducing ICE and promoting EV vehicle ownership. These were mostly focused on United States @jenn_etal18, @hardman_etal18. In the European context important data come from Norway (global leader in EV adoption) @kester_etal18, @schulz_rode22. In Central Europe a review was performed of Polish customer preferences @scasny_etal18, @bryla_etal22. 
+
+In our article we present a study of adoption of EVs in the Czech Republic administrative areas, as explained by socioeconomic characteristic of these regions. Dynamics of EV adoption are estimated using linear regression. Out of total of `r ncol(sf::st_drop_geometry(podklad))-1` possible predictors a subset was selected using technique of stepwise regression.
+
+# Methodology
+
+```{r summary}
+
+rocne <- registrace %>% 
+  group_by(rok_registrace, typ_obchodu, typ)  %>%
+  summarise(pocet = n()) %>% 
+  collect() %>% 
+  pivot_wider(names_from = typ, values_from = pocet, values_fill = 0) %>% 
+  summarise(
+    spalovaci = sum(spalovací),
+    elektro = sum(elektro),
+    hybrid = sum(hybrid),
+    celkem = spalovaci + elektro + hybrid,
+    share_elektro = elektro / celkem,
+    share_hybrid = hybrid / celkem,
+    share_ev = share_elektro + share_hybrid
+            ) %>% 
+  ungroup()
+ 
+```
+
+The data were collected from the Czech Ministry of Transport Open Data @registr monthly snapshots. For the purpose of our analysis only registrations from years `r min(rocne$rok_registrace)` to `r max(rocne$rok_registrace)` were used, since EV registrations in earlier periods were negligible. The vehicle registration dataset provides spatial breakdown to the level of municipalities with extended powers (ORP).
+
+We selected only personal vehicles, defined as M1 category in the relevant regulation @vyhlaska341. Vehicle registrations in this category were further split into retail segment, defined as vehicle registrations by individuals (for private purposes) and non-retail segment, defined as vehicle registrations by companies. The retail segment also includes personal vehicles operated by individuals under leasing contracts.
+
+Detailed breakdown of EV over brands and models is presented in @tbl-models.
+
+
+```{r models}
+#| label: tbl-models
+#| tbl-cap: Model Breakdown
+
+model_breakdown <- registrace %>% 
+  filter(typ != "spalovací") %>% 
+  select(typ_obchodu, tovarni_znacka, obchodni_oznaceni, vin) %>% 
+  collect()
+
+# ladění velikosti tabulky modelů / méně = více v "others"
+hranice_znacek <- 200
+hranice_modelu <- 50
+
+vyznamne_znacky <- model_breakdown %>%
+  group_by(tovarni_znacka) %>% 
+  tally() %>%
+  filter(n > hranice_znacek) %>% 
+  pull(tovarni_znacka)
+
+model_breakdown <- model_breakdown %>% 
+  mutate(mod_znacka = case_when(tovarni_znacka %in% vyznamne_znacky ~ tovarni_znacka,
+                                T ~ "other brands")) %>% 
+  mutate(mod_znacka = fct_infreq(mod_znacka)) %>% 
+  mutate(mod_znacka = fct_relevel(mod_znacka, "other brands", after = Inf)) %>% 
+  pivot_wider(names_from = typ_obchodu, 
+              values_from = vin,
+              values_fn = list(vin = length),
+              values_fill = 0) %>% 
+  mutate(mod_oznaceni = case_when(retail + `non-retail` < hranice_modelu ~ "other models",
+                                  !mod_znacka %in% vyznamne_znacky ~ "other models",
+                                  TRUE ~ obchodni_oznaceni)) %>% 
+  group_by(mod_znacka, mod_oznaceni) %>% 
+  summarise(retail = sum(retail),
+            non_retail = sum(`non-retail`)) %>% 
+  mutate(sort_order = case_when(mod_oznaceni == "other models" ~ 0, # ostatní na konec
+                                T ~ retail + non_retail)) %>% 
+  arrange(desc(sort_order), .by_group = T) %>% 
+  select(-sort_order) %>% 
+  bind_rows(tibble(mod_znacka = "",
+                   mod_oznaceni = "",
+                   retail = sum(.$retail),
+                   non_retail = sum(.$non_retail))) %>% 
+  mutate(retail = prettynum(retail),
+         non_retail = prettynum(non_retail))
+  
+model_breakdown %>%   
+  kable(format = "latex",
+        booktabs = T,
+        align = c("l", "l", "r", "r"),
+        col.names = c("Brand", "Model", "Retail", "Non-Retail"),
+        linesep = "") %>% 
+  kable_styling(full_width = F,
+                latex_options = "HOLD_position") %>% 
+  row_spec(0, bold = T, align = "c") %>% 
+  row_spec(nrow(model_breakdown)-1, hline_after = T)
+
+```
+
+In order to model consumer activity we focused on retail registrations. Electrification of corporate fleets is expected to contribute materially to the overall reduction of transport CO~2~ emissions the behavior of corporate fleets, but it is best understood as a separate problem, impractical to model based on local socioeconomic variables.
+
+For a deeper illustration consider comparison of Retail vs. Non-Retail EV penetration (@fig-retail-nonretail), noting the high penetration of EV registrations in Mladá Boleslav and Vrchlabí regions; these can be explained better as location of facilities of Škoda Auto than as result of local socioeconomic factors.
+
+```{r mapa-penetrace}
+#| label: fig-retail-nonretail
+#| fig-cap: Non-retail vs. Retail EV Penetration (log scale) in Czech ORPs (n = 206)
+#| fig-align: center
+#| fig-height: 8
+#| fig-pos: 'H'
+ 
+registrace_orp <- registrace %>% 
+  group_by(KOD_ORP, typ_obchodu, typ, vin) %>% 
+  summarise(pocet = n()) %>% 
+  collect() %>% 
+  pivot_wider(names_from = typ, values_from = pocet, values_fill = 0) %>% 
+  summarise(
+    spalovaci = sum(spalovací),
+    elektro = sum(elektro),
+    hybrid = sum(hybrid),
+    celkem = spalovaci + elektro + hybrid,
+    share_elektro = elektro / celkem,
+    share_hybrid = hybrid / celkem,
+    share_ev = share_elektro + share_hybrid
+            ) %>% 
+  ungroup()
+  
+orp_chart_src <- orp_polygony() %>% 
+  inner_join(registrace_orp, by = c("KOD_ORP" = "KOD_ORP")) %>% 
+  mutate(typ_obchodu = stringr::str_to_title(typ_obchodu))
+
+ggplot(data = orp_chart_src) +
+  geom_sf(aes(fill = share_ev),
+          color = NA) +
+  scale_fill_viridis_c(trans = "log10",
+                       labels = scales::percent) +
+  facet_wrap(facets = "typ_obchodu",
+             nrow = 2) +
+  labs(title = "BEVs & Hybrids as share of vehicle registrations",
+       caption = paste("M1 vehicle registrations for years", min(rocne$rok_registrace), "–",
+                       max(rocne$rok_registrace),
+                       "\nsource: https://www.mdcr.cz/Statistiky/Silnicni-doprava/Centralni-registr-vozidel")) +
+  theme_void() +
+  theme(legend.position="bottom",
+        legend.title = element_blank(),
+        plot.title = element_text(hjust = 0.5,
+                                  margin = margin(0,0,15,0)),
+        plot.caption = element_text(face = "italic"),
+        legend.margin = margin(0,10,10,0)
+        )
+
+```
+
+For the socioeconomic predictors we used results of the previous (2011) census @vysledky11; the results of the 2021 census were not available at the time of writing in the necessary level of detail. The census data were accessed from the Statistical Office API using *czso* package @bouchal22. Data processing and modelling was done in statistical programming language R @erko. Modelling was performed using package *leaps* @miller20 for stepwise regression. Bayesian information criterion @schwarz78 was used as primary metric for variable selection.
+
+Given that the population of the `r nrow(RCzechia::orp_polygony())` Czech ORPs varies by several orders of magnitude (from more than a million in the capital to less than 10 thousands in Pacov or Králíky regions) it was impractical to model registrations in terms of total registrations per region. Instead relative penetration was used – EV registration as percentage of total personal vehicle registration. Likewise socioeconomic predictors were normalized by population of the ORP.
+
+A basic analysis of spatial dependency was performed using package *RCzechia* @lacko23. Spatial autocorrelation of EV penetration at ORP level was measured using Moran's I statistic, as defined in @bivand_pebesma23. 
+
+$$
+I = \frac{n \times \sum_{i=1}^n\sum_{j=1}^n w_{ij}(x_i - \bar{x})(x_j - \bar{x})}{S_0 \times \sum_{i=1}^n (x_i - \bar{x})^2}
+$$
+where $x_i, i = 1, ..., n$ are the $n$ observations, $w_{ij}$ are the spatial weights and $S_0$ is the sum of spatial weights $\sum_{i, j=1}^n w_{ij}$.
+
+The value of the Moran's I statistic of Retail EV penetration was calculated via package *sfdep*  @parry23, using rook neighborhood definition for determining the adjacency matrix of individual ORPs. 
+
+# Result 
+
+During the period in question total of `r prettynum(sum(rocne$spalovaci) + sum(rocne$elektro) + sum(rocne$hybrid))` personal vehicles were registered, of which `r prettynum(sum(rocne$elektro) + sum(rocne$hybrid))` could be considered EV's (`r prettynum(sum(rocne$elektro))` battery operated EVs and `r prettynum(sum(rocne$hybrid))` hybrid EVs).
+
+Majority of the EV registrations come from the non-retail segment: `r prettynum(sum(subset(rocne, typ_obchodu == "non-retail")$elektro) + sum(subset(rocne, typ_obchodu == "non-retail")$hybrid))` registrations. Compared to this the retail segment had only `r prettynum(sum(subset(rocne, typ_obchodu == "retail")$elektro) + sum(subset(rocne, typ_obchodu == "retail")$hybrid))` registrations, which is `r prettyprc((sum(subset(rocne, typ_obchodu == "retail")$elektro) + sum(subset(rocne, typ_obchodu == "retail")$hybrid)) / (sum(rocne$elektro)+sum(rocne$hybrid)))` of total EV registrations over the period in consideration.
+
+
+```{r}
+#| message: FALSE
+#| warning: FALSE
+#| label: fig-stepwise
+#| fig-cap: Schwartz's information criterion / stepwise regression
+#| fig-align: center
+#| fig-height: 4
+#| fig-width: 6.5
+#| fig-pos: 'H'
+
 
 plot_regsubsets_mod(leaps_model, scale="bic", cex.axis = 0.66, main = "Variable Selection of Socioeconomic Predictors")
 
@@ -405,22 +407,49 @@ Out of the total `r ncol(sf::st_drop_geometry(podklad))-1` socioeconomic variabl
 #| label: tbl-coeffs
 #| tbl-cap: Regression Coefficients
 
-coef(leaps_model, which.min(summary(leaps_model)$bic)) %>% 
-    kable(format = "latex",
-        booktabs = T,
-        align = c("r"),
-        col.names = c("coefficient"),
-        linesep = '') %>% 
-  kable_styling(full_width = F,
-                latex_options = "HOLD_position") %>% 
-  row_spec(0, bold = T, align = 'c') 
-
-
 # model přes lm, abychom měli standardní summary - jako R2, F statistic etc.
 reg_model <- lm(data = st_drop_geometry(podklad),
-                formula = as.formula(paste("podil_friendly ~", paste(names(coef(leaps_model, which.min(summary(leaps_model)$bic))[-1]), collapse="+"))))
+                formula = as.formula(paste("share_friendly ~", paste(names(coef(leaps_model, which.min(summary(leaps_model)$bic))[-1]), collapse="+"))))
+
+summary(reg_model)$coefficients[, c(1, 4)] %>% 
+  as.data.frame() %>% 
+  tibble::rownames_to_column("predictor") %>% 
+  mutate(predictor = gsub("_", "\\\\_", predictor)) %>% 
+  mutate(materiality = gtools::stars.pval(`Pr(>|t|)`)) %>% 
+    kable(format = "latex",
+        booktabs = T,
+        align = c("l", "r", "r", "c"),
+        col.names = c("Predictor", 
+                      "Estimate", 
+                      "p-value", 
+                      paste("Significance", footnote_marker_number(1, "latex"))),
+        linesep = "",
+        escape = F) %>% 
+  kable_styling(full_width = F,
+                latex_options = "HOLD_position") %>% 
+  row_spec(0, bold = T, align = "c") %>% 
+  footnote(number = "Using convention: 0 = ***, 0.001 = **, 0.01=  *, 0.05 = .")
+
 
 ```
+
+The predictors were calculated as:
+
+* *share_tertiary* – ratio of population with tertiary education to population over 15 years of age
+
+* *share_secondary* – ratio of population with secondary education (only) to population over 15 years of age 
+
+* *share_20_29* – ratio of population in age bracket 20 to 29 years of age to total population
+
+* *share_30_39* – ratio of population in age bracket 30 to 39 years of age to total population
+
+* *share_40_49* – ratio of population in age bracket 40 to 49 years of age to total population
+
+The coefficients identified via stepwise selection in @tbl-coeffs can be interpreted as belonging to two groups: the first related to education - with the share of population with tertiary education leading to higher EV penetration, and share of population with secondary education only leading to lower EV penetration.
+
+The second group relates to age structure: share of population in early productive age (20–29 years) drives EV adoption down, and share of population in middle to upper middle productive age (30–39 and 40–49) drives EV adoption up. Other socioeconomic factors, including those related to employment status, nationality and religion, did not have a significant effect on EV adoption as measured by the BIC criterion.
+
+A possible common theme behind the two groups of socioeconomic predictors identified is income. While average income was not one of the census variables considered it is known to correlate with both education level and age @struktura21 – with average wages increasing with education, and peaking in the 40 to 44 age bracket.
 
 The R^2^ statistic for our proposed model is `r prettynum(summary(reg_model)$r.squared)`, meaning our model does fully explain the variance observed. On the other hand the F statistic is `r prettynum(summary(reg_model)$fstatistic["value"])`, indicating a highly significant relationship.
 
@@ -431,7 +460,7 @@ podklad$resids <- reg_model$residuals
 podklad$fitted <- reg_model$fitted.values
 
 # původní hodnoty - raw
-orig_moran <- global_moran_test(podklad$podil_friendly,
+orig_moran <- global_moran_test(podklad$share_friendly,
              nb = st_contiguity(podklad$geometry, queen = F),
              wt = st_weights(st_contiguity(podklad$geometry, queen = F)))
 
@@ -443,25 +472,11 @@ resids_moran <- global_moran_test(podklad$resids,
 ```
 The original data of retail EV penetration showed high degree of spatial autocorrelation as calculated using `r orig_moran$method`. The observed value of Moran's I statistic for EV penetration was `r orig_moran$statistic`, indicating a significant autocorrelation at p-value `r orig_moran$p.value`.
 
-The same statistic calculated for residuals after linear modelling for the `r length(names(coef(leaps_model, which.min(summary(leaps_model)$bic)))[-1])` socioeconomic predictors showed much less spatial dependence, with Moran's I at `r resids_moran$statistic`. This implies p-value `r resids_moran$p.value`, leading us to reject a hypothesis of spatial autocorrelation of model residuals. 
-
-Thus the socioeconomic model has removed the observed autocorrelation from EV penetration data, leaving only random effect.
-
-# Discussion
-
-The coefficients identified via stepwise selection in @tbl-coeffs can be split into two groups: the first related to education - with the share of population with tertiary education leading to higher EV penetration, and share of population with secondary education only leading to lower EV penetration.
-
-The second group relates to age structure: share of population in early productive age (20–29 years) drives EV adoption down, and share of population in middle to upper middle productive age (30–39 and 40–49) drives EV adoption up.
-
-Other socioeconomic factors, including those related to employment status, nationality and religion, did not have a significant effect on EV adoption as measured by the BIC criterion.
-
-A possible common theme behind the two groups of socioeconomic predictors identified is income. While average income was not one of the census variables considered it is known to correlate with both education level and age @struktura21 – with average wages increasing with education, and peaking in the 40 to 44 age bracket.
+The same statistic calculated for residuals after linear modelling for the `r length(names(coef(leaps_model, which.min(summary(leaps_model)$bic)))[-1])` socioeconomic predictors showed much less spatial dependence, with Moran's I at `r resids_moran$statistic`. This implies p-value `r resids_moran$p.value`, leading us to reject a hypothesis of spatial autocorrelation of model residuals. Thus the socioeconomic model has removed the observed autocorrelation from EV penetration data, leaving only random effect.
 
 # Conclusion
 
-We propose a model explaining the rate of adoption of Electric Vehicles in the Czech Republic retail segment based on socioeconomic predictors at ORP level. The model identified 5 significant predictors (two related to education, and three related to age structure). The identified predictors are variables known to correlate with personal income. 
-
-While our model did not explain the observed differences in EV adoption over Czech ORPs fully, it did remove the effect of spatial autocorrelation from the data, leaving only random residuals.
+We propose a model explaining the dynamics of Electric Vehicles in the Czech Republic retail segment based on socioeconomic predictors at the level of `r nrow(podklad)` Czech administrative units. The model identified 5 significant predictors (two related to education, and three related to age structure). The identified predictors are variables known to correlate with personal income. While our model did not explain the observed differences in EV adoption over Czech ORPs fully, it did remove the effect of spatial autocorrelation from the data, leaving only random effect.
 
 # Acknowledgement
 
@@ -470,6 +485,7 @@ The work was supported by the Prague University of Economics and Business projec
 # References
 
 \hfill
+
 
 ```{r finally}
 
