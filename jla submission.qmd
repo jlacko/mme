@@ -470,9 +470,9 @@ resids_moran <- global_moran_test(podklad$resids,
              wt = st_weights(st_contiguity(podklad$geometry, queen = F)))
 
 ```
-The original data of retail EV penetration showed high degree of spatial autocorrelation as calculated using `r orig_moran$method`. The observed value of Moran's I statistic for EV penetration was `r orig_moran$statistic`, indicating a significant autocorrelation at p-value `r orig_moran$p.value`.
+The original data of retail EV penetration showed high degree of spatial autocorrelation as calculated using `r orig_moran$method`. The observed value of Moran's I statistic for EV penetration was `r prettynum(orig_moran$estimate[1])`, with Z-score `r prettynum(orig_moran$statistic)` indicating a significant autocorrelation at *p*-value `r orig_moran$p.value`.
 
-The same statistic calculated for residuals after linear modelling for the `r length(names(coef(leaps_model, which.min(summary(leaps_model)$bic)))[-1])` socioeconomic predictors showed much less spatial dependence, with Moran's I at `r resids_moran$statistic`. This implies p-value `r resids_moran$p.value`, leading us to reject a hypothesis of spatial autocorrelation of model residuals. Thus the socioeconomic model has removed the observed autocorrelation from EV penetration data, leaving only random effect.
+Compared to the `r orig_moran$method` for original values, which showed strong autocorrelation, the same test for residuals after linear modelling for the `r length(names(coef(leaps_model, which.min(summary(leaps_model)$bic)))[-1])` socioeconomic predictors displays much less spatial dependence, with Moran's I statistic of `r prettynum(resids_moran$estimate[1])`, with Z-score `r prettynum(resids_moran$statistic)`. This implies *p*-value `r resids_moran$p.value`, leading us to reject a hypothesis of spatial autocorrelation of model residuals. Thus the socioeconomic model has removed the observed autocorrelation from EV penetration data, leaving only random effect.
 
 # Conclusion
 
