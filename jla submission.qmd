@@ -1,7 +1,7 @@
 ---
 title: "Socioeconomic Determinants of Electric Vehicle Adoption in Czechia"
 abstract: 
-  "The EU and the Czech Republic aim to reduce transport related CO~2~ emissions compared to 1990 level; a key enabler of this endeavor is expected to be replacement of internal combustion engines by battery operated and hybrid propulsion vehicles. We investigate vehicle registration data in retail segment over the years 2019 to 2022 using stepwise linear regression technique and propose a model explaining rate of adoption of electric vehicles based on 37 socioeconomic predictors observed in 206 Czech administrative areas. Our model finds 5 significant predictors, displays a solid goodness of fit and removes spatial autocorrelation observed in original data."
+  "In an effort to reduce transportation-related CO~2~ emissions to levels below those of 1990, the European Union and the Czech Republic are prioritizing the transition from internal combustion engines to battery-operated and hybrid propulsion vehicles. This study examines Czech vehicle registration data in the retail sector from 2019 to 2022, utilizing a stepwise linear regression approach to develop a model that explains the rate of electric vehicle adoption based on 37 socioeconomic predictors across 206 Czech administrative regions. The resulting model identifies five significant predictors, demonstrates a robust goodness of fit, and effectively mitigates the spatial autocorrelation initially observed in the data."
 keywords: 
   "Battery electric vehicles, Hybrid vehicles, Technology adoption and diffusion, Czechia"
 JEL:
@@ -224,7 +224,7 @@ Reducing CO~2~ emissions significantly in comparison to 1990 levels is a target 
 
 As a consequence any plan to reduce and / or eliminate ICE personal vehicle ownership and use must include introducing of alternatives, such as Electric Vehicles (EV's). A number of studies was performed to evaluate the effectiveness of incentives in reducing ICE and promoting EV vehicle ownership. These were mostly focused on United States @jenn_etal18, @hardman_etal18. In the European context important data come from Norway (global leader in EV adoption) @kester_etal18, @schulz_rode22. In Central Europe a review was performed of Polish customer preferences @scasny_etal18, @bryla_etal22. 
 
-In our article we present a study of adoption of EVs in the Czech Republic administrative areas, as explained by socioeconomic characteristic of these regions. Dynamics of EV adoption are estimated using linear regression. Out of total of `r ncol(sf::st_drop_geometry(podklad))-1` possible predictors a subset was selected using technique of stepwise regression.
+This article presents a study of adoption of EVs in the Czech Republic administrative areas, as explained by socioeconomic characteristic of these regions. Dynamics of EV adoption are estimated using linear regression. Out of total of `r ncol(sf::st_drop_geometry(podklad))-1` possible predictors a subset was selected using technique of stepwise regression.
 
 # Methodology
 
@@ -257,7 +257,7 @@ Detailed breakdown of EV over brands and models is presented in @tbl-models.
 
 ```{r models}
 #| label: tbl-models
-#| tbl-cap: Model Breakdown
+#| tbl-cap: Model Breakdown of EV Registrations
 
 model_breakdown <- registrace %>% 
   filter(typ != "spalovací") %>% 
@@ -313,7 +313,7 @@ model_breakdown %>%
 
 ```
 
-In order to model consumer activity we focused on retail registrations. Electrification of corporate fleets is expected to contribute materially to the overall reduction of transport CO~2~ emissions the behavior of corporate fleets, but it is best understood as a separate problem, impractical to model based on local socioeconomic variables.
+In order to model consumer activity we focused on retail registrations. Electrification of corporate fleets is expected to contribute materially to the overall reduction of transport CO~2~ emissions, but it is best understood as a separate problem, impractical to model based on local socioeconomic variables.
 
 For a deeper illustration consider comparison of Retail vs. Non-Retail EV penetration (@fig-retail-nonretail), noting the high penetration of EV registrations in Mladá Boleslav and Vrchlabí regions; these can be explained better as location of facilities of Škoda Auto than as result of local socioeconomic factors.
 
@@ -377,7 +377,7 @@ I = \frac{n \times \sum_{i=1}^n\sum_{j=1}^n w_{ij}(x_i - \bar{x})(x_j - \bar{x})
 $$
 where $x_i, i = 1, ..., n$ are the $n$ observations, $w_{ij}$ are the spatial weights and $S_0$ is the sum of spatial weights $\sum_{i, j=1}^n w_{ij}$.
 
-The value of the Moran's I statistic of Retail EV penetration was calculated via package *sfdep*  @parry23, using rook neighborhood definition for determining the adjacency matrix of individual ORPs. 
+The value of the Moran's I statistic of Retail EV penetration was calculated via package *sfdep*  @parry23, using rook neighborhood definition for determining the adjacency matrix of individual ORPs to evaluate spatial dependency of observed data. 
 
 # Result 
 
@@ -433,7 +433,7 @@ summary(reg_model)$coefficients[, c(1, 4)] %>%
 
 ```
 
-The predictors were calculated as:
+The predictors selected using the stepwise regression approach can be described as:
 
 * *share_tertiary* – ratio of population with tertiary education to population over 15 years of age
 
@@ -445,7 +445,7 @@ The predictors were calculated as:
 
 * *share_40_49* – ratio of population in age bracket 40 to 49 years of age to total population
 
-The coefficients identified via stepwise selection in @tbl-coeffs can be interpreted as belonging to two groups: the first related to education - with the share of population with tertiary education leading to higher EV penetration, and share of population with secondary education only leading to lower EV penetration.
+The coefficients identified via stepwise selection in @tbl-coeffs can be interpreted as belonging to two groups: the first related to education - with the share of population with tertiary education leading to higher EV penetration, and share of population with secondary education only leading to lower EV penetration (yet with lower magnitude of the effect).
 
 The second group relates to age structure: share of population in early productive age (20–29 years) drives EV adoption down, and share of population in middle to upper middle productive age (30–39 and 40–49) drives EV adoption up. Other socioeconomic factors, including those related to employment status, nationality and religion, did not have a significant effect on EV adoption as measured by the BIC criterion.
 
@@ -472,7 +472,7 @@ resids_moran <- global_moran_test(podklad$resids,
 ```
 The original data of retail EV penetration showed high degree of spatial autocorrelation as calculated using `r orig_moran$method`. The observed value of Moran's I statistic for EV penetration was `r prettynum(orig_moran$estimate[1])`, with Z-score `r prettynum(orig_moran$statistic)` indicating a significant autocorrelation at *p*-value `r orig_moran$p.value`.
 
-Compared to the `r orig_moran$method` for original values, which showed strong autocorrelation, the same test for residuals after linear modelling for the `r length(names(coef(leaps_model, which.min(summary(leaps_model)$bic)))[-1])` socioeconomic predictors displays much less spatial dependence, with Moran's I statistic of `r prettynum(resids_moran$estimate[1])`, with Z-score `r prettynum(resids_moran$statistic)`. This implies *p*-value `r resids_moran$p.value`, leading us to reject a hypothesis of spatial autocorrelation of model residuals. Thus the socioeconomic model has removed the observed autocorrelation from EV penetration data, leaving only random effect.
+Compared to the `r orig_moran$method` for original values, which showed strong autocorrelation, the same test for residuals after linear modelling for the `r length(names(coef(leaps_model, which.min(summary(leaps_model)$bic)))[-1])` socioeconomic predictors displays much less spatial dependence, with Moran's I statistic of `r prettynum(resids_moran$estimate[1])`, with Z-score `r prettynum(resids_moran$statistic)`. This implies *p*-value `r resids_moran$p.value`, leading us to reject a hypothesis of spatial autocorrelation of model residuals. Thus the socioeconomic model describes the observed data efficiently and it has removed the observed spatial dependency from EV penetration data, leaving only random effect.
 
 # Conclusion
 
@@ -480,7 +480,7 @@ We propose a model explaining the dynamics of Electric Vehicles in the Czech Rep
 
 # Acknowledgement
 
-The work was supported by the Prague University of Economics and Business project IGS  24/2023.
+This contribution was supported by the Prague University of Economics and Business project IGS 24/2023.
 
 # References
 
