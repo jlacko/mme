@@ -13,7 +13,7 @@ affiliation: "Vysoká škola ekonomická v Praze / Katedra Ekonometrie"
 email: "jindra.lacko@vse.cz"
 format: 
   pdf:
-    keep-tex: true
+    keep-tex: false
 knitr:
   opts_chunk: 
     fig.showtext: true
@@ -471,7 +471,7 @@ resids_moran <- global_moran_test(podklad$resids,
                                   wt = st_weights(st_contiguity(podklad$geometry, queen = T)))
 
 ```
-The original data of retail EV penetration was diagnosed for spatial autocorrelation using `r LM_raw$LMerr$method`. The observed value of test statistic of `r LM_raw$LMerr$statistic` at `r LM_raw$LMerr$parameter` degrees of freedom indicates a highly significant relationship.
+The original data of retail EV penetration was diagnosed using `r LM_raw$LMerr$method`. The test statistic of `r LM_raw$LMerr$statistic` at `r LM_raw$LMerr$parameter` degree of freedom strongly indicates a spatial dependence.
 
 The observed value of Moran's I statistic for EV penetration was `r prettynum(orig_moran$estimate[1])`, with Z-score `r prettynum(orig_moran$statistic)` indicating a significant autocorrelation at *p*-value `r orig_moran$p.value`.
 
