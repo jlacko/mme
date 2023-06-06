@@ -218,7 +218,7 @@ leaps_model <- leaps::regsubsets(share_friendly ~ .,
 
 # Introduction
 
-Reducing CO~2~ emissions significantly in comparison to 1990 levels is a target of both global @paris16  and regional initiatives @green_deal19. A key factor for achieving this aim is reducing the volume of CO~2~ emissions from transportation @proposal21. This is in line with the contribution transportation related emissions have made to the current stock of CO~2~ in the Earth's atmosphere. In order to achieve these aims it will be necessary to significantly reduce the volume of active Internal Combustion Engine (ICE) vehicles on EU roads. While alternatives to personal vehicle ownership such as mass transit and bicycling are certain to be a part of the solution it is unlikely that the current level of vehicle ownership (over 6 million personal vehicles are registered in the Czech Republic alone, a country of 10 million inhabitants @slaba_houst22) could be feasibly reduced to zero.
+Reducing CO~2~ emissions significantly in comparison to 1990 levels is a target of both global @paris16  and regional initiatives @green_deal19. A key factor for achieving this aim is reducing the volume of CO~2~ emissions from transportation. This is in line with the contribution transportation related emissions have made to the current stock of CO~2~ in the Earth's atmosphere. In order to achieve these aims it will be necessary to significantly reduce the volume of active Internal Combustion Engine (ICE) vehicles on EU roads. While alternatives to personal vehicle ownership such as mass transit and bicycling are certain to be a part of the solution it is unlikely that the current level of vehicle ownership (over 6 million personal vehicles are registered in the Czech Republic alone, a country of 10 million inhabitants @slaba_houst22) could be feasibly reduced to zero.
 
 As a consequence any plan to reduce and / or eliminate ICE personal vehicle ownership and use must include introducing of alternatives, such as Electric Vehicles (EV's). A number of studies was performed to evaluate the effectiveness of incentives in reducing ICE and promoting EV vehicle ownership. These were mostly focused on United States @jenn_etal18, @hardman_etal18. In the European context important data come from Norway (global leader in EV adoption) @kester_etal18, @schulz_rode22. In Central Europe a review was performed of Polish customer preferences @scasny_etal18, @bryla_etal22. 
 
@@ -368,14 +368,14 @@ For the socioeconomic predictors we used results of the previous (2011) census @
 
 Given that the population of the `r nrow(RCzechia::orp_polygony())` Czech ORPs varies by several orders of magnitude (from more than a million in the capital to less than 10 thousands in Pacov or Králíky regions) it was impractical to model registrations in terms of total registrations per region. Instead relative penetration was used – EV registration as percentage of total personal vehicle registration. Likewise socioeconomic predictors were normalized by population of the ORP.
 
-A basic analysis of spatial dependency was performed using package *RCzechia* @lacko23. Spatial dependence of observed results was diagnosed via Lagrange Multiplier Test Diagnostics for Spatial Dependence and Spatial Heterogeneity @anselin88a. Spatial autocorrelation of EV penetration at ORP level was measured using Moran's I statistic, as defined in @bivand_pebesma23. 
+A basic analysis of spatial dependence – which, if confirmed, would violate two key assumptions of ordinary least squares method, namely homoskedasticity and spatial independence of residuals – was performed using package *RCzechia* @lacko23. Spatial error was diagnosed via Lagrange Multiplier Test Diagnostics for Spatial Dependence and Spatial Heterogeneity @anselin88a. Spatial autocorrelation of EV penetration at ORP level was measured using Moran's I statistic, as defined in @bivand_pebesma23. 
 
 $$
 I = \frac{n \times \sum_{i=1}^n\sum_{j=1}^n w_{ij}(x_i - \bar{x})(x_j - \bar{x})}{S_0 \times \sum_{i=1}^n (x_i - \bar{x})^2}
 $$
 where $x_i, i = 1, ..., n$ are the $n$ observations, $w_{ij}$ are the spatial weights and $S_0$ is the sum of spatial weights $\sum_{i, j=1}^n w_{ij}$.
 
-The value of the Moran's I statistic of Retail EV penetration was calculated via package *sfdep*  @parry23, using queen neighborhood definition for determining the adjacency matrix of individual ORPs to evaluate spatial dependency of observed data. 
+The value of the Moran's I statistic of Retail EV penetration was calculated via package *sfdep*  @parry23, using queen contiguity neighborhood definition for determining the adjacency matrix of individual ORPs in order to evaluate spatial dependency of observed data. 
 
 # Result 
 
@@ -384,7 +384,7 @@ During the period in question total of `r prettynum(sum(rocne$spalovaci) + sum(r
 Majority of the EV registrations come from the non-retail segment: `r prettynum(sum(subset(rocne, typ_obchodu == "non-retail")$elektro) + sum(subset(rocne, typ_obchodu == "non-retail")$hybrid))` registrations. Compared to this the retail segment had only `r prettynum(sum(subset(rocne, typ_obchodu == "retail")$elektro) + sum(subset(rocne, typ_obchodu == "retail")$hybrid))` registrations, which is `r prettyprc((sum(subset(rocne, typ_obchodu == "retail")$elektro) + sum(subset(rocne, typ_obchodu == "retail")$hybrid)) / (sum(rocne$elektro)+sum(rocne$hybrid)))` of total EV registrations over the period in consideration.
 
 
-```{r}
+```{r stepwise-plot}
 #| label: fig-stepwise
 #| fig-cap: Schwartz's information criterion / stepwise regression
 #| fig-align: center
@@ -455,7 +455,7 @@ library(spdep)
 podklad$resids <- reg_model$residuals
 podklad$fitted <- reg_model$fitted.values
 
-# lagrange multiplier test
+# lagrange multiplier test raw data
 LM_raw <- lm.LMtests(model = podklad$share_friendly,
                      listw = nb2listw(st_contiguity(podklad$geometry, queen = T)),
                      test = "LMerr")
@@ -469,13 +469,21 @@ orig_moran <- global_moran_test(podklad$share_friendly,
 resids_moran <- global_moran_test(podklad$resids,
                                   nb = st_contiguity(podklad$geometry, queen = T),
                                   wt = st_weights(st_contiguity(podklad$geometry, queen = T)))
+# lagrange multiplier test modelled data 
+LM_model <- lm.LMtests(model = reg_model,
+                       listw = nb2listw(st_contiguity(podklad$geometry, queen = T)),
+                       test = "LMerr")
 
 ```
-The original data of retail EV penetration was diagnosed using `r LM_raw$LMerr$method`. The test statistic of `r LM_raw$LMerr$statistic` at `r LM_raw$LMerr$parameter` degree of freedom strongly indicates a spatial dependence.
+Based on visual overview shown in @fig-retail-nonretail we formed a hypothesis of spatial heterogeneity of retail EV penetration – given the noticeable clusters of high penetration in Prague, Brno and their outskirts. To formally validate our hypothesis a test was performed using `r LM_raw$LMerr$method`. The test statistic of `r prettynum(LM_raw$LMerr$statistic)` at `r LM_raw$LMerr$parameter` degree of freedom strongly indicates a spatial dependence.
 
-The observed value of Moran's I statistic for EV penetration was `r prettynum(orig_moran$estimate[1])`, with Z-score `r prettynum(orig_moran$statistic)` indicating a significant autocorrelation at *p*-value `r orig_moran$p.value`.
+In addition the observed value of Moran's I statistic for EV penetration was `r prettynum(orig_moran$estimate[1])`, with *z*-score `r prettynum(orig_moran$statistic)` indicating a significant autocorrelation at *p*-value `r orig_moran$p.value`.
 
-Compared to the `r orig_moran$method` for original values, which showed strong autocorrelation, the same test for residuals after linear modelling for the `r length(names(coef(leaps_model, which.min(summary(leaps_model)$bic)))[-1])` socioeconomic predictors displays much less spatial dependence, with Moran's I statistic of `r prettynum(resids_moran$estimate[1])`, with Z-score `r prettynum(resids_moran$statistic)`. This implies *p*-value `r resids_moran$p.value`, leading us to reject a hypothesis of spatial autocorrelation of model residuals. Thus the socioeconomic model describes the observed data efficiently and it has removed the observed spatial dependency from EV penetration data, leaving only random effect.
+Compared to the `r orig_moran$method` for original values, which showed strong autocorrelation, the same test for residuals after linear modelling for the `r length(names(coef(leaps_model, which.min(summary(leaps_model)$bic)))[-1])` socioeconomic predictors displays much less spatial dependence, with Moran's I statistic of `r prettynum(resids_moran$estimate[1])`, with *z*-score `r prettynum(resids_moran$statistic)`. This implies *p*-value `r resids_moran$p.value`, leading us to reject a hypothesis of spatial autocorrelation of model residuals. 
+
+Finally we performed the `r LM_model$LMerr$method` test on the model fitted for 5 socioeconomic predictors. Test statistic of `r prettynum(LM_model$LMerr$statistic)` at `r LM_model$LMerr$parameter` degree of freedom implies *p*-value `r LM_model$LMerr$p.value`, again leading us to reject a hypothesis of spatial dependence. 
+
+Thus we confirmed that the socioeconomic model describes the observed data efficiently and that it has removed the observed spatial dependency from EV penetration data, leaving only random effect.
 
 # Conclusion
 
