@@ -440,13 +440,13 @@ The predictors selected using the stepwise regression approach can be described 
 
 * *share_40_49* – ratio of population in age bracket 40 to 49 years of age to total population
 
-The coefficients identified via stepwise selection in @tbl-coeffs can be interpreted as belonging to two groups: the first related to education - with the share of population with tertiary education leading to higher EV penetration, and share of population with secondary education only leading to lower EV penetration (yet with lower magnitude of the effect).
+The coefficients identified via stepwise selection in @tbl-coeffs can be interpreted as belonging to two groups: the first related to education – with the share of population with tertiary education leading to higher EV penetration, and share of population with secondary education only leading to lower EV penetration (yet with lower magnitude of the effect).
 
 The second group relates to age structure: share of population in early productive age (20–29 years) drives EV adoption down, and share of population in middle to upper middle productive age (30–39 and 40–49) drives EV adoption up. Other socioeconomic factors, including those related to employment status, nationality and religion, did not have a significant effect on EV adoption as measured by the BIC criterion.
 
 A possible common theme behind the two groups of socioeconomic predictors identified is income. While average income was not one of the census variables considered it is known to correlate with both education level and age @struktura21 – with average wages increasing with education, and peaking in the 40 to 44 age bracket.
 
-The R^2^ statistic for our proposed model is `r prettynum(summary(reg_model)$r.squared)`, meaning our model does fully explain the variance observed. On the other hand the F statistic is `r prettynum(summary(reg_model)$fstatistic["value"])`, indicating a highly significant relationship.
+The R^2^ statistic for our proposed model is `r prettynum(summary(reg_model)$r.squared)`, meaning our model does not fully explain the variance observed. On the other hand the F statistic is `r prettynum(summary(reg_model)$fstatistic["value"])`, indicating a highly significant relationship.
 
 ```{r moran-i}
 library(sfdep)
