@@ -1,0 +1,553 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Using the `mmeproc' class: commented example                    %%
+%% To be compiled with LaTeX 2e                                    %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% Start with \documentclass, omit any page/size options
+%%
+\documentclass{mmeproc}
+
+%% Put your custom packages here, for example:
+\usepackage{pgf}        % advanced graphics
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{tabu}
+
+%% Some packages are already preloaded, you do not need load them
+%% anymore: graphicx, geometry, amsmath, amssymb, and ams
+
+
+%% Put your custom definitions here, for example:
+\makeatletter
+\def\convertto#1#2{\strip@pt\dimexpr #2*65536/\number\dimexpr 1#1}
+\makeatother
+
+% math operator for variance
+\DeclareMathOperator\var{var}
+
+\usepackage[hidelinks]{hyperref} 
+\urlstyle{same}
+
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{1.5em}
+\newlength{\csllabelwidth}
+\setlength{\csllabelwidth}{3em}
+\newlength{\cslentryspacingunit} % times entry-spacing
+\setlength{\cslentryspacingunit}{\parskip}
+\newenvironment{CSLReferences}[2] % #1 hanging-ident, #2 entry spacing
+ {% don't indent paragraphs
+  \setlength{\parindent}{0pt}
+  % turn on hanging indent if param 1 is 1
+  \ifodd #1
+% \let\oldpar\par
+% \def\par{\hangindent=\cslhangindent\oldpar}
+  \fi
+  % set entry spacing
+  \setlength{\parskip}{-2pt}
+ }%
+ {}
+\usepackage{calc}
+\newcommand{\CSLBlock}[1]{#1\hfill\break}
+\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{#1}}
+\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{#1}\break}
+\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
+
+
+%% Start your document
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                   TITLE PAGE INFORMATION                        %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% mandatory information: title, author, institute, abstract, keywords
+%% optional information: e-mail, JEL and AMS classification
+%%
+%% the order in which the info is introduced is not important
+%%
+\title{Socioeconomic Determinants of Electric Vehicle Adoption in
+Czechia}
+\author{
+  	Jindra Lacko\null
+    	\institute{Vysoká škola ekonomická v Praze / Katedra Ekonometrie}
+    	\email{jindra.lacko@vse.cz}
+  }
+%%
+\begin{abstract} \fontsize{11pt}{13pt}\selectfont
+  	In an effort to reduce transportation-related CO\textsubscript{2}
+  emissions to levels below those of 1990, the European Union and the
+  Czech Republic are prioritizing the transition from internal
+  combustion engines to battery-operated and hybrid propulsion vehicles.
+  This study examines Czech vehicle registration data in the retail
+  sector from 2019 to 2022, utilizing a stepwise linear regression
+  approach to develop a model that explains the rate of electric vehicle
+  adoption based on 37 socioeconomic predictors across 206 Czech
+  administrative regions. The resulting model identifies five
+  significant predictors, demonstrates a robust goodness of fit, and
+  effectively mitigates the spatial autocorrelation initially observed
+  in the data.
+\end{abstract}
+%%
+\keywords{Battery electric vehicles, Hybrid vehicles, Technology
+adoption and diffusion, Czechia} 	% Keywords
+%%
+\jelsubjclass{Q54, C31}  % JEL classification
+%%
+\amssubjclass{62M30}  % AMS classification
+%% generate the title
+\maketitle
+%% no numbering of the title page
+\pagenumbering{gobble}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                      ARTICLE TEXT                               %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\hypertarget{introduction}{%
+\section{Introduction}\label{introduction}}
+
+Reducing CO\textsubscript{2} emissions significantly in comparison to
+1990 levels is a target of both global {[}1{]} and regional initiatives
+{[}2{]}. A key factor for achieving this aim is reducing the volume of
+CO\textsubscript{2} emissions from transportation. This is in line with
+the contribution transportation related emissions have made to the
+current stock of CO\textsubscript{2} in the Earth's atmosphere. In order
+to achieve these aims it will be necessary to significantly reduce the
+volume of active Internal Combustion Engine (ICE) vehicles on EU roads.
+While alternatives to personal vehicle ownership such as mass transit
+and bicycling are certain to be a part of the solution it is unlikely
+that the current level of vehicle ownership (over 6 million personal
+vehicles are registered in the Czech Republic alone, a country of 10
+million inhabitants {[}3{]}) could be feasibly reduced to zero.
+
+As a consequence any plan to reduce and / or eliminate ICE personal
+vehicle ownership and use must include introducing of alternatives, such
+as Electric Vehicles (EV's). A number of studies was performed to
+evaluate the effectiveness of incentives in reducing ICE and promoting
+EV vehicle ownership. These were mostly focused on United States
+{[}4{]}, {[}5{]}. In the European context important data come from
+Norway (global leader in EV adoption) {[}6{]}, {[}7{]}. In Central
+Europe a review was performed of Polish customer preferences {[}8{]},
+{[}9{]}.
+
+This article presents a study of adoption of EVs in the Czech Republic
+administrative areas, as explained by socioeconomic characteristic of
+these regions. Dynamics of EV adoption are estimated using linear
+regression. Out of total of 37 possible predictors a subset was selected
+using technique of stepwise regression.
+
+\hypertarget{methodology}{%
+\section{Methodology}\label{methodology}}
+
+The data were collected from the Czech Ministry of Transport Open Data
+{[}10{]} monthly snapshots. For the purpose of our analysis only
+registrations from years 2019 to 2022 were used, since EV registrations
+in earlier periods were negligible. The vehicle registration dataset
+provides spatial breakdown to the level of municipalities with extended
+powers (ORP).
+
+We selected only personal vehicles, defined as M1 category in the
+relevant regulation {[}11{]}. Vehicle registrations in this category
+were further split into retail segment, defined as vehicle registrations
+by individuals (for private purposes) and non-retail segment, defined as
+vehicle registrations by companies. The retail segment also includes
+personal vehicles operated by individuals under leasing contracts.
+
+Detailed breakdown of EV over brands and models is presented in
+Table~\ref{tbl-models}.
+
+\hypertarget{tbl-models}{}
+\begin{table}[H]
+\centering
+\begin{tabular}{llrr}
+\toprule
+\multicolumn{1}{c}{\textbf{Brand}} & \multicolumn{1}{c}{\textbf{Model}} & \multicolumn{1}{c}{\textbf{Retail}} & \multicolumn{1}{c}{\textbf{Non-Retail}}\\
+\midrule
+ŠKODA & ENYAQ 80 & 58 & 1 512\\
+ŠKODA & ENYAQ RS & 11 & 629\\
+ŠKODA & ENYAQ 80X & 30 & 332\\
+ŠKODA & ENYAQ 60 & 6 & 202\\
+ŠKODA & other models & 0 & 1\\
+TESLA & MODEL 3 & 232 & 692\\
+TESLA & MODEL Y & 48 & 206\\
+TESLA & MODEL S & 56 & 157\\
+TESLA & MODEL X & 18 & 115\\
+TESLA & other models & 19 & 33\\
+TOYOTA & YARIS HYBRID & 334 & 591\\
+TOYOTA & PRIUS & 198 & 63\\
+TOYOTA & PRIUS PLUS & 36 & 18\\
+TOYOTA & other models & 85 & 46\\
+NISSAN & LEAF 40KWH & 28 & 171\\
+NISSAN & LEAF & 47 & 28\\
+NISSAN & other models & 42 & 60\\
+RENAULT & CAPTUR E-TECH PLUG-IN HYBRID & 17 & 112\\
+RENAULT & CLIO E-TECH HYBRID & 14 & 101\\
+RENAULT & MEGANE E-TECH PLUG-IN HYBRID & 2 & 54\\
+RENAULT & other models & 8 & 19\\
+BMW & IX XDRIVE40 & 2 & 71\\
+BMW & IX3 & 3 & 70\\
+BMW & other models & 17 & 108\\
+SEAT & SEAT LEON SP E-HYBRID150 & 0 & 190\\
+SEAT & other models & 0 & 34\\
+other brands & other models & 147 & 435\\
+\midrule
+ &  & 1 458 & 6 050\\
+\bottomrule
+\end{tabular}
+\caption{\label{tbl-models}Model Breakdown of EV Registrations }\tabularnewline
+\end{table}
+
+In order to model consumer activity we focused on retail registrations.
+Electrification of corporate fleets is expected to contribute materially
+to the overall reduction of transport CO\textsubscript{2} emissions, but
+it is best understood as a separate problem, impractical to model based
+on local socioeconomic variables.
+
+For a deeper illustration consider comparison of Retail vs.~Non-Retail
+EV penetration (Figure~\ref{fig-retail-nonretail}), noting the high
+penetration of EV registrations in Mladá Boleslav and Vrchlabí regions;
+these can be explained better as location of facilities of Škoda Auto
+than as result of local socioeconomic factors.
+
+\begin{figure}[H]
+
+{\centering \includegraphics{jla-submission_files/figure-pdf/fig-retail-nonretail-1.pdf}
+
+}
+
+\caption{\label{fig-retail-nonretail}Non-retail vs.~Retail EV
+Penetration (log scale) in Czech ORPs (n = 206)}
+
+\end{figure}
+
+For the socioeconomic predictors we used results of the previous (2011)
+census {[}12{]}; the results of the 2021 census were not available at
+the time of writing in the necessary level of detail. The census data
+were accessed from the Statistical Office API using \emph{czso} package
+{[}13{]}. Data processing and modelling was done in statistical
+programming language R {[}14{]}. Modelling was performed using package
+\emph{leaps} {[}15{]} for stepwise regression. Bayesian information
+criterion {[}16{]} was used as primary metric for variable selection.
+
+Given that the population of the 206 Czech ORPs varies by several orders
+of magnitude (from more than a million in the capital to less than 10
+thousands in Pacov or Králíky regions) it was impractical to model
+registrations in terms of total registrations per region. Instead
+relative penetration was used -- EV registration as percentage of total
+personal vehicle registration. Likewise socioeconomic predictors were
+normalized by population of the ORP.
+
+A basic analysis of spatial dependence -- which, if confirmed, would
+violate two key assumptions of ordinary least squares method, namely
+homoskedasticity and spatial independence of residuals -- was performed
+using package \emph{RCzechia} {[}17{]}. Spatial error was diagnosed via
+Lagrange Multiplier Test Diagnostics for Spatial Dependence and Spatial
+Heterogeneity {[}18{]}. Spatial autocorrelation of EV penetration at ORP
+level was measured using Moran's I statistic, as defined in {[}19{]}.
+
+\[
+I = \frac{n \times \sum_{i=1}^n\sum_{j=1}^n w_{ij}(x_i - \bar{x})(x_j - \bar{x})}{S_0 \times \sum_{i=1}^n (x_i - \bar{x})^2} \tag{1}
+\]
+where \(x_i, i = 1, ..., n\) are the \(n\) observations, \(w_{ij}\)
+are the spatial weights and \(S_0\) is the sum of spatial weights
+\(\sum_{i, j=1}^n w_{ij}\).
+
+The value of the Moran's I statistic of Retail EV penetration was
+calculated via package \emph{sfdep} {[}20{]}, using queen contiguity
+neighborhood definition for determining the adjacency matrix of
+individual ORPs in order to evaluate spatial dependency of observed
+data.
+
+\hypertarget{result}{%
+\section{Result}\label{result}}
+
+During the period in question total of 1 451 075 personal vehicles were
+registered, of which 7 508 could be considered EV's (5 004 battery
+operated EVs and 2 504 hybrid EVs).
+
+Majority of the EV registrations come from the non-retail segment: 6 050
+registrations. Compared to this the retail segment had only 1 458
+registrations, which is 19.42\% of total EV registrations over the
+period in consideration.
+
+\begin{figure}[H]
+
+{\centering \includegraphics{jla-submission_files/figure-pdf/fig-stepwise-1.pdf}
+
+}
+
+\caption{\label{fig-stepwise}Schwartz's information criterion / stepwise
+regression}
+
+\end{figure}
+
+Out of the total 37 socioeconomic variables under consideration we
+identified the lowest BIC (-56.30301) for model containing intercept and
+5 predictors. The predictors and their regression coefficient values are
+summarized in Table~\ref{tbl-coeffs}:
+
+\hypertarget{tbl-coeffs}{}
+\begin{table}[H]
+\centering
+\begin{tabular}{lrrc}
+\toprule
+\multicolumn{1}{c}{\textbf{Predictor}} & \multicolumn{1}{c}{\textbf{Estimate}} & \multicolumn{1}{c}{\textbf{p-value}} & \multicolumn{1}{c}{\textbf{Significance \textsuperscript{1}}}\\
+\midrule
+(Intercept) & -0.0026054 & 0.2802696 & \\
+share\_tertiary & 0.0231545 & 0.0000000 & ***\\
+share\_secondary & -0.0111015 & 0.0104648 & *\\
+share\_20\_29 & -0.0346547 & 0.0004859 & ***\\
+share\_30\_39 & 0.0218416 & 0.0005671 & ***\\
+share\_40\_49 & 0.0428472 & 0.0007255 & ***\\
+\bottomrule
+\multicolumn{4}{l}{\rule{0pt}{1em}\textsuperscript{1} Using convention: 0 = ***, 0.001 = **, 0.01=  *, 0.05 = .}\\
+\end{tabular}
+\caption{\label{tbl-coeffs}Regression Coefficients }\tabularnewline
+\end{table}
+
+The predictors selected using the stepwise regression approach can be
+described as:
+
+\begin{itemize}
+\item
+  \emph{share\_tertiary} -- ratio of population with tertiary education
+  to population over 15 years of age
+\item
+  \emph{share\_secondary} -- ratio of population with secondary
+  education (only) to population over 15 years of age
+\item
+  \emph{share\_20\_29} -- ratio of population in age bracket 20 to 29
+  years of age to total population
+\item
+  \emph{share\_30\_39} -- ratio of population in age bracket 30 to 39
+  years of age to total population
+\item
+  \emph{share\_40\_49} -- ratio of population in age bracket 40 to 49
+  years of age to total population
+\end{itemize}
+
+The coefficients identified via stepwise selection in
+Table~\ref{tbl-coeffs} can be interpreted as belonging to two groups:
+the first related to education -- with the share of population with
+tertiary education leading to higher EV penetration, and share of
+population with secondary education only leading to lower EV penetration
+(yet with lower magnitude of the effect).
+
+The second group relates to age structure: share of population in early
+productive age (20--29 years) drives EV adoption down, and share of
+population in middle to upper middle productive age (30--39 and 40--49)
+drives EV adoption up. Other socioeconomic factors, including those
+related to employment status, nationality and religion, did not have a
+significant effect on EV adoption as measured by the BIC criterion.
+
+A possible common theme behind the two groups of socioeconomic
+predictors identified is income. While average income was not one of the
+census variables considered it is known to correlate with both education
+level and age {[}21{]} -- with average wages increasing with education,
+and peaking in the 40 to 44 age bracket.
+
+The R\textsuperscript{2} statistic for our proposed model is 0.3485121,
+meaning our model does not fully explain the variance observed. On the
+other hand the F statistic is 21.39792, indicating a highly significant
+relationship.
+
+Based on visual overview shown in Figure~\ref{fig-retail-nonretail} we
+formed a hypothesis of spatial heterogeneity of retail EV penetration --
+given the noticeable clusters of high penetration in Prague, Brno and
+their outskirts. To formally validate our hypothesis a test was
+performed using Lagrange multiplier diagnostics for spatial dependence.
+The test statistic of 288.4171 at 1 degree of freedom strongly indicates
+a spatial dependence.
+
+In addition the observed value of Moran's I statistic for EV penetration
+was 0.2615302, with \emph{z}-score 6.243977 indicating a significant
+autocorrelation at \emph{p}-value \ensuremath{2.1329152\times 10^{-10}}.
+
+Compared to the Moran I test under randomisation for original values,
+which showed strong autocorrelation, the same test for residuals after
+linear modelling for the 5 socioeconomic predictors displays much less
+spatial dependence, with Moran's I statistic of 0.01352744, with
+\emph{z}-score 0.4261943. This implies \emph{p}-value 0.3349831, leading
+us to reject a hypothesis of spatial autocorrelation of model residuals.
+
+Finally we performed the Lagrange multiplier diagnostics for spatial
+dependence test on the model fitted for 5 socioeconomic predictors. Test
+statistic of 0.09503605 at 1 degree of freedom implies \emph{p}-value
+0.7578699, again leading us to reject a hypothesis of spatial
+dependence.
+
+Thus we confirmed that the socioeconomic model describes the observed
+data efficiently and that it has removed the observed spatial dependency
+from EV penetration data, leaving only random effect.
+
+\hypertarget{conclusion}{%
+\section{Conclusion}\label{conclusion}}
+
+We propose a model explaining the dynamics of Electric Vehicles in the
+Czech Republic retail segment based on socioeconomic predictors at the
+level of 206 Czech administrative units. The model identified 5
+significant predictors (two related to education, and three related to
+age structure). The identified predictors are variables known to
+correlate with personal income. While our model did not explain the
+observed differences in EV adoption over Czech ORPs fully, it did remove
+the effect of spatial autocorrelation from the data, leaving only random
+effect.
+
+\hypertarget{acknowledgement}{%
+\section{Acknowledgement}\label{acknowledgement}}
+
+This contribution was supported by the Prague University of Economics
+and Business project IGS F4/24/2023.
+
+\hypertarget{references}{%
+\section{References}\label{references}}
+
+\hfill
+
+\hypertarget{refs}{}
+\begin{CSLReferences}{0}{0}
+\leavevmode\vadjust pre{\hypertarget{ref-paris16}{}}%
+\CSLLeftMargin{{[}1{]} }%
+\CSLRightInline{{``The {Paris} {Agreement}.''} Mar. 2016. Available:
+\url{https://unfccc.int/process-and-meetings/the-paris-agreement}}
+
+\leavevmode\vadjust pre{\hypertarget{ref-green_deal19}{}}%
+\CSLLeftMargin{{[}2{]} }%
+\CSLRightInline{{``Communication from the {Commission} to the {European}
+{Parliament}, the {European} {Council}, the {Council}, the {European}
+{Economic} and {Social} {Committee} and the {Committee} of the {Regions}
+{The} {European} {Green} {Deal}.''} 2019. Available:
+\url{https://eur-lex.europa.eu/legal-content/EN/TXT/?qid=1588580774040\&uri=CELEX\%3A52019DC0640}}
+
+\leavevmode\vadjust pre{\hypertarget{ref-slaba_houst22}{}}%
+\CSLLeftMargin{{[}3{]} }%
+\CSLRightInline{R. Slabá and R. Houšť, {``Ročenka dopravy {České
+Republiky} 2021,''} \emph{Ministerstvo dopravy ČR}, 2022, Available:
+\url{https://www.sydos.cz/cs/rocenka-2021/index.html}}
+
+\leavevmode\vadjust pre{\hypertarget{ref-jenn_etal18}{}}%
+\CSLLeftMargin{{[}4{]} }%
+\CSLRightInline{A. Jenn, K. Springel, and A. R. Gopal, {``Effectiveness
+of electric vehicle incentives in the {United} {States},''} \emph{Energy
+Policy}, vol. 119, pp. 349--356, Aug. 2018, doi:
+\href{https://doi.org/10.1016/j.enpol.2018.04.065}{10.1016/j.enpol.2018.04.065}.}
+
+\leavevmode\vadjust pre{\hypertarget{ref-hardman_etal18}{}}%
+\CSLLeftMargin{{[}5{]} }%
+\CSLRightInline{S. Hardman \emph{et al.}, {``A review of consumer
+preferences of and interactions with electric vehicle charging
+infrastructure,''} \emph{Transportation Research Part D: Transport and
+Environment}, vol. 62, pp. 508--523, Jul. 2018, doi:
+\href{https://doi.org/10.1016/j.trd.2018.04.002}{10.1016/j.trd.2018.04.002}.}
+
+\leavevmode\vadjust pre{\hypertarget{ref-kester_etal18}{}}%
+\CSLLeftMargin{{[}6{]} }%
+\CSLRightInline{J. Kester, L. Noel, G. Zarazua de Rubens, and B. K.
+Sovacool, {``Policy mechanisms to accelerate electric vehicle adoption:
+{A} qualitative review from the {Nordic} region,''} \emph{Renewable and
+Sustainable Energy Reviews}, vol. 94, pp. 719--731, Oct. 2018, doi:
+\href{https://doi.org/10.1016/j.rser.2018.05.067}{10.1016/j.rser.2018.05.067}.}
+
+\leavevmode\vadjust pre{\hypertarget{ref-schulz_rode22}{}}%
+\CSLLeftMargin{{[}7{]} }%
+\CSLRightInline{F. Schulz and J. Rode, {``Public charging infrastructure
+and electric vehicles in {Norway},''} \emph{Energy Policy}, vol. 160, p.
+112660, Jan. 2022, doi:
+\href{https://doi.org/10.1016/j.enpol.2021.112660}{10.1016/j.enpol.2021.112660}.}
+
+\leavevmode\vadjust pre{\hypertarget{ref-scasny_etal18}{}}%
+\CSLLeftMargin{{[}8{]} }%
+\CSLRightInline{M. Ščasný, I. Zvěřinová, and M. Czajkowski, {``Electric,
+plug-in hybrid, hybrid, or conventional? {Polish} consumers' preferences
+for electric vehicles,''} \emph{Energy Efficiency}, vol. 11, no. 8, pp.
+2181--2201, Dec. 2018, doi:
+\href{https://doi.org/10.1007/s12053-018-9754-1}{10.1007/s12053-018-9754-1}.}
+
+\leavevmode\vadjust pre{\hypertarget{ref-bryla_etal22}{}}%
+\CSLLeftMargin{{[}9{]} }%
+\CSLRightInline{P. Bryła, S. Chatterjee, and B. Ciabiada-Bryła,
+{``Consumer {Adoption} of {Electric} {Vehicles}: {A} {Systematic}
+{Literature} {Review},''} \emph{Energies}, vol. 16, no. 1, p. 205, Dec.
+2022, doi:
+\href{https://doi.org/10.3390/en16010205}{10.3390/en16010205}.}
+
+\leavevmode\vadjust pre{\hypertarget{ref-registr}{}}%
+\CSLLeftMargin{{[}10{]} }%
+\CSLRightInline{Ministerstvo dopravy ČR, {``Registr silničních
+vozidel,''} \emph{Statistiky {\textbar} Silniční doprava {\textbar}
+Registr silničních vozidel}. Available:
+\url{https://www.mdcr.cz/Statistiky/Silnicni-doprava/Centralni-registr-vozidel}}
+
+\leavevmode\vadjust pre{\hypertarget{ref-vyhlaska341}{}}%
+\CSLLeftMargin{{[}11{]} }%
+\CSLRightInline{{``341/2014 {Sb}. {Vyhláška} o schvalování technické
+způsobilosti a o technických podmínkách provozu vozidel na pozemnních
+komunikacích.''} Available:
+\url{https://www.zakonyprolidi.cz/cs/2014-341}}
+
+\leavevmode\vadjust pre{\hypertarget{ref-vysledky11}{}}%
+\CSLLeftMargin{{[}12{]} }%
+\CSLRightInline{{``Výsledky sčítání lidu, domů a bytů 2011 ({SLDB}
+2011),''} Český statistický úřad. Available:
+\url{https://www.czso.cz/csu/czso/otevrena_data_pro_vysledky_scitani_lidu_domu_a_bytu_2011_sldb_2011}}
+
+\leavevmode\vadjust pre{\hypertarget{ref-bouchal22}{}}%
+\CSLLeftMargin{{[}13{]} }%
+\CSLRightInline{P. Bouchal, {``{czso}: {Use} {Open} {Data} from the
+{Czech} {Statistical} {Office} in {R}.''} Sep. 2022. Available:
+\url{https://CRAN.R-project.org/package=czso}}
+
+\leavevmode\vadjust pre{\hypertarget{ref-erko}{}}%
+\CSLLeftMargin{{[}14{]} }%
+\CSLRightInline{R Core Team, \emph{R: A language and environment for
+statistical computing}. Vienna, Austria: R Foundation for Statistical
+Computing, 2023. Available: \url{https://www.R-project.org/}}
+
+\leavevmode\vadjust pre{\hypertarget{ref-miller20}{}}%
+\CSLLeftMargin{{[}15{]} }%
+\CSLRightInline{Thomas Lumley based on Fortran code by Alan Miller,
+{``{leaps}: {Regression} {Subset} {Selection}.''} Jan. 2020. Available:
+\url{https://CRAN.R-project.org/package=leaps}}
+
+\leavevmode\vadjust pre{\hypertarget{ref-schwarz78}{}}%
+\CSLLeftMargin{{[}16{]} }%
+\CSLRightInline{G. Schwarz, {``Estimating the {Dimension} of a
+{Model},''} \emph{The Annals of Statistics}, vol. 6, no. 2, pp.
+461--464, Mar. 1978, doi:
+\href{https://doi.org/10.1214/aos/1176344136}{10.1214/aos/1176344136}.}
+
+\leavevmode\vadjust pre{\hypertarget{ref-lacko23}{}}%
+\CSLLeftMargin{{[}17{]} }%
+\CSLRightInline{J. Lacko, {``{RCzechia}: {Spatial} {Objects} of the
+{Czech} {Republic},''} \emph{Journal of Open Source Software}, vol. 8,
+no. 83, p. 5082, Mar. 2023, doi:
+\href{https://doi.org/10.21105/joss.05082}{10.21105/joss.05082}.}
+
+\leavevmode\vadjust pre{\hypertarget{ref-anselin88a}{}}%
+\CSLLeftMargin{{[}18{]} }%
+\CSLRightInline{L. Anselin, {``Lagrange {Multiplier} {Test}
+{Diagnostics} for {Spatial} {Dependence} and {Spatial}
+{Heterogeneity},''} \emph{Geographical Analysis}, vol. 20, no. 1, pp.
+1--17, 1988, doi:
+\href{https://doi.org/10.1111/j.1538-4632.1988.tb00159.x}{10.1111/j.1538-4632.1988.tb00159.x}.}
+
+\leavevmode\vadjust pre{\hypertarget{ref-bivand_pebesma23}{}}%
+\CSLLeftMargin{{[}19{]} }%
+\CSLRightInline{R. Bivand and E. Pebesma, \emph{Spatial {Data} {Science}
+with applications in {R}}, 1st ed. Chapman \& Hall, 2023. Available:
+\url{https://r-spatial.org/book/}}
+
+\leavevmode\vadjust pre{\hypertarget{ref-parry23}{}}%
+\CSLLeftMargin{{[}20{]} }%
+\CSLRightInline{J. Parry, {``{sfdep}: {Spatial} {Dependence} for
+{Simple} {Features}.''} Jan. 2023. Available:
+\url{https://CRAN.R-project.org/package=sfdep}}
+
+\leavevmode\vadjust pre{\hypertarget{ref-struktura21}{}}%
+\CSLLeftMargin{{[}21{]} }%
+\CSLRightInline{{``Struktura mezd zaměstnanců - 2021,''} Český
+statistický úřad. Available:
+\url{https://www.czso.cz/csu/czso/struktura-mezd-zamestnancu-2021}}
+
+\end{CSLReferences}
+
+\end{document}
