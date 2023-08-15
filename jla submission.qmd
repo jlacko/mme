@@ -13,7 +13,7 @@ affiliation: "Vysoká škola ekonomická v Praze / Katedra Ekonometrie"
 email: "jindra.lacko@vse.cz"
 format: 
   pdf:
-    keep-tex: false
+    keep-tex: true
 knitr:
   opts_chunk: 
     fig.showtext: true
@@ -108,7 +108,7 @@ reg_src <- registrace %>%
   summarise(pocet = count(vin)) %>% 
   collect() %>% 
   pivot_wider(names_from = typ, values_from = pocet, values_fill = 0) %>% 
-  mutate(share_spalovaci = spalovací / (spalovací + elektro + hybrid)) %>% 
+  mutate(share_spalovaci = spalovaci / (spalovaci + elektro + hybrid)) %>% 
   mutate(share_friendly = 1 - share_spalovaci) %>% 
   ungroup()
 
@@ -234,7 +234,7 @@ rocne <- registrace %>%
   collect() %>% 
   pivot_wider(names_from = typ, values_from = pocet, values_fill = 0) %>% 
   summarise(
-    spalovaci = sum(spalovací),
+    spalovaci = sum(spalovaci),
     elektro = sum(elektro),
     hybrid = sum(hybrid),
     celkem = spalovaci + elektro + hybrid,
@@ -258,7 +258,7 @@ Detailed breakdown of EV over brands and models is presented in @tbl-models.
 #| tbl-cap: Model Breakdown of EV Registrations
 
 model_breakdown <- registrace %>% 
-  filter(typ != "spalovací") %>% 
+  filter(typ != "spalovaci") %>% 
   select(typ_obchodu, tovarni_znacka, obchodni_oznaceni, vin) %>% 
   collect()
 
@@ -328,7 +328,7 @@ registrace_orp <- registrace %>%
   collect() %>% 
   pivot_wider(names_from = typ, values_from = pocet, values_fill = 0) %>% 
   summarise(
-    spalovaci = sum(spalovací),
+    spalovaci = sum(spalovaci),
     elektro = sum(elektro),
     hybrid = sum(hybrid),
     celkem = spalovaci + elektro + hybrid,
