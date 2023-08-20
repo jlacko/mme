@@ -106,8 +106,8 @@ adoption and diffusion, Czechia} 	% Keywords
 \section{Introduction}\label{introduction}}
 
 Reducing CO\textsubscript{2} emissions significantly in comparison to
-1990 levels is a target of both global {[}20{]} and regional initiatives
-{[}6{]}. A key factor for achieving this aim is reducing the volume of
+1990 levels is a target of both global and regional initiatives. 
+A key factor for achieving this aim is reducing the volume of
 CO\textsubscript{2} emissions from transportation. This is in line with
 the contribution transportation related emissions have made to the
 current stock of CO\textsubscript{2} in the Earth's atmosphere. In order
@@ -117,15 +117,15 @@ While alternatives to personal vehicle ownership such as mass transit
 and bicycling are certain to be a part of the solution it is unlikely
 that the current level of vehicle ownership (over 6 million personal
 vehicles are registered in the Czech Republic alone, a country of 10
-million inhabitants {[}17{]}) could be feasibly reduced to zero.
+million inhabitants {[}18{]}) could be feasibly reduced to zero.
 
 As a consequence any plan to reduce and / or eliminate ICE personal
 vehicle ownership and use must include introducing of alternatives, such
 as Electric Vehicles (EV's). A number of studies was performed to
 evaluate the effectiveness of incentives in reducing ICE and promoting
 EV vehicle ownership. These were mostly focused on United States
-{[}7{]}, {[}8{]}. In the European context important data come from
-Norway (global leader in EV adoption) {[}9{]}, {[}15{]}. In Central
+{[}8{]}, {[}9{]}. In the European context important data come from
+Norway (global leader in EV adoption) {[}10{]}, {[}16{]}. In Central
 Europe a review was performed of Polish customer preferences {[}5{]},
 {[}19{]}.
 
@@ -139,7 +139,7 @@ using technique of stepwise regression.
 \section{Methodology}\label{methodology}}
 
 The data were collected from the Czech Ministry of Transport Open Data
-{[}12{]} monthly snapshots. For the purpose of our analysis only
+{[}13{]} monthly snapshots. For the purpose of our analysis only
 registrations from years 2019 to 2022 were used, since EV registrations
 in earlier periods were negligible. The vehicle registration dataset
 provides spatial breakdown to the level of municipalities with extended
@@ -220,13 +220,13 @@ Penetration (log scale) in Czech ORPs (n = 206)}
 \end{figure}
 
 For the socioeconomic predictors we used results of the previous (2011)
-census {[}21{]}; the results of the 2021 census were not available at
+census {[}6{]}; the results of the 2021 census were not available at
 the time of writing in the necessary level of detail. The census data
 were accessed from the Statistical Office API using \emph{czso} package
 {[}4{]}. Data processing and modelling was done in statistical
-programming language R {[}14{]}. Modelling was performed using package
-\emph{leaps} {[}11{]} for stepwise regression. Bayesian information
-criterion {[}16{]} was used as primary metric for variable selection.
+programming language R {[}15{]}. Modelling was performed using package
+\emph{leaps} {[}12{]} for stepwise regression. Bayesian information
+criterion {[}17{]} was used as primary metric for variable selection.
 
 Given that the population of the 206 Czech ORPs varies by several orders
 of magnitude (from more than a million in the capital to less than 10
@@ -239,7 +239,7 @@ normalized by population of the ORP.
 A basic analysis of spatial dependence -- which, if confirmed, would
 violate two key assumptions of ordinary least squares method, namely
 homoskedasticity and spatial independence of residuals -- was performed
-using package \emph{RCzechia} {[}10{]}. Spatial error was diagnosed via
+using package \emph{RCzechia} {[}11{]}. Spatial error was diagnosed via
 Lagrange Multiplier Test Diagnostics for Spatial Dependence and Spatial
 Heterogeneity {[}2{]}. Spatial autocorrelation of EV penetration at ORP
 level was measured using Moran's I statistic (1), as defined in {[}3{]}.
@@ -252,7 +252,7 @@ are the spatial weights and \(S_0\) is the sum of spatial weights
 \(\sum_{i, j=1}^n w_{ij}\).
 
 The value of the Moran's I statistic of Retail EV penetration was
-calculated via package \emph{sfdep} {[}13{]}, using queen contiguity
+calculated via package \emph{sfdep} {[}14{]}, using queen contiguity
 neighborhood definition for determining the adjacency matrix of
 individual ORPs in order to evaluate spatial dependency of observed
 data.
@@ -342,7 +342,7 @@ significant effect on EV adoption as measured by the BIC criterion.
 A possible common theme behind the two groups of socioeconomic
 predictors identified is income. While average income was not one of the
 census variables considered it is known to correlate with both education
-level and age {[}18{]} -- with average wages increasing with education,
+level and age {[}7{]} -- with average wages increasing with education,
 and peaking in the 40 to 44 age bracket.
 
 The R\textsuperscript{2} statistic for our proposed model is 0.3485121,
@@ -414,126 +414,113 @@ komunikacích.} }
 
 \leavevmode\vadjust pre{\hypertarget{ref-anselin88a}{}}%
 \CSLLeftMargin{{[}2{]} }%
-\CSLRightInline{Anselin, L. (1988) {Lagrange {Multiplier} {Test}
+\CSLRightInline{Anselin, L. (1988). {Lagrange {Multiplier} {Test}
 {Diagnostics} for {Spatial} {Dependence} and {Spatial}
 {Heterogeneity},} \emph{Geographical Analysis}, vol. 20, no. 1,
 1--17. \url{https://doi.org/10.1111/j.1538-4632.1988.tb00159.x}.}
 
 \leavevmode\vadjust pre{\hypertarget{ref-bivand_pebesma23}{}}%
 \CSLLeftMargin{{[}3{]} }%
-\CSLRightInline{Bivand, R. and Pebesma, E. (2023) \emph{Spatial {Data} {Science}
-with applications in {R}}, 1st ed. Chapman \& Hall.}
+\CSLRightInline{Bivand, R. \& Pebesma, E. (2023). \emph{Spatial {Data} {Science}
+with applications in {R}}, Chapman \& Hall/CRC. \url{https://doi.org/10.1201/9780429459016}}
 
 \leavevmode\vadjust pre{\hypertarget{ref-bouchal22}{}}%
 \CSLLeftMargin{{[}4{]} }%
-\CSLRightInline{Bouchal, P. (2022) {{czso}: {Use} {Open} {Data} from the
+\CSLRightInline{Bouchal, P. (2022). \emph{{czso}: {Use} {Open} {Data} from the
 {Czech} {Statistical} {Office} in {R}.} Available at:
 \url{https://CRAN.R-project.org/package=czso} {{[}cited 2023-08-15{]}}}
 
 \leavevmode\vadjust pre{\hypertarget{ref-bryla_etal22}{}}%
 \CSLLeftMargin{{[}5{]} }%
-\CSLRightInline{Bryła, P., Chatterjee, S. and Ciabiada-Bryła, B., (2022)
+\CSLRightInline{Bryła, P., Chatterjee, S. \& Ciabiada-Bryła, B. (2022).
 {Consumer {Adoption} of {Electric} {Vehicles}: {A} {Systematic}
 {Literature} {Review},} \emph{Energies}, vol. 16, no. 1.
 \url{https://doi.org/10.3390/en16010205}.}
 
-\leavevmode\vadjust pre{\hypertarget{ref-green_deal19}{}}%
+\leavevmode\vadjust pre{\hypertarget{ref-vysledky11}{}}%
 \CSLLeftMargin{{[}6{]} }%
-\CSLRightInline{{Communication from the {Commission} to the {European}
-{Parliament}, the {European} {Council}, the {Council}, the {European}
-{Economic} and {Social} {Committee} and the {Committee} of the {Regions} \emph{{The} {European} {Green} {Deal}}.} 2019. Available at:
-\url{https://eur-lex.europa.eu/legal-content/EN/TXT/?qid=1588580774040\&uri=CELEX\%3A52019DC0640} {{[}cited 2023-08-15{]}}}
+\CSLRightInline{Český statistický úřad (2011).  \emph{Výsledky sčítání lidu, domů a bytů 2011}. Available at:
+\url{https://www.czso.cz/csu/czso/otevrena_data_pro_vysledky_scitani_lidu_domu_a_bytu_2011_sldb_2011} {{[}cited 2023-08-15{]}}}
+
+\leavevmode\vadjust pre{\hypertarget{ref-struktura21}{}}%
+\CSLLeftMargin{{[}7{]} }%
+\CSLRightInline{{Český statistický úřad} (2022). \emph{Struktura mezd zaměstnanců -- 2021}. Available at:
+\url{https://www.czso.cz/csu/czso/struktura-mezd-zamestnancu-2021} {{[}cited 2023-08-15{]}}}
 
 \leavevmode\vadjust pre{\hypertarget{ref-hardman_etal18}{}}%
-\CSLLeftMargin{{[}7{]} }%
-\CSLRightInline{Hardman, S. et al., (2018) {A review of consumer
+\CSLLeftMargin{{[}8{]} }%
+\CSLRightInline{Hardman, S. et al. (2018). {A review of consumer
 preferences of and interactions with electric vehicle charging
-infrastructure,} \emph{Transportation Research Part D: Transport and
+infrastructure} \emph{Transportation Research Part D: Transport and
 Environment}, vol. 62, 508--523. \url{https://doi.org/10.1016/j.trd.2018.04.002}.}
 
 \leavevmode\vadjust pre{\hypertarget{ref-jenn_etal18}{}}%
-\CSLLeftMargin{{[}8{]} }%
-\CSLRightInline{Jenn, A., Springel, K. and Gopal, A. R. (2018) {Effectiveness
+\CSLLeftMargin{{[}9{]} }%
+\CSLRightInline{Jenn, A., Springel, K. \& Gopal, A. R. (2018). {Effectiveness
 of electric vehicle incentives in the {United} {States},} \emph{Energy
 Policy}, vol. 119, 349--356. \url{https://doi.org/10.1016/j.enpol.2018.04.065}.}
 
 \leavevmode\vadjust pre{\hypertarget{ref-kester_etal18}{}}%
-\CSLLeftMargin{{[}9{]} }%
-\CSLRightInline{Kester, J., Noel,  L., Zarazua de Rubens,  G. and 
-Sovacool, B. K. (2018) {Policy mechanisms to accelerate electric vehicle adoption:
+\CSLLeftMargin{{[}10{]} }%
+\CSLRightInline{Kester, J., Noel,  L., Zarazua de Rubens,  G. \& 
+Sovacool, B. K. (2018). {Policy mechanisms to accelerate electric vehicle adoption:
 {A} qualitative review from the {Nordic} region,} \emph{Renewable and
 Sustainable Energy Reviews}, vol. 94, 719--731. \url{https://doi.org/10.1016/j.rser.2018.05.067}.}
 
 \leavevmode\vadjust pre{\hypertarget{ref-lacko23}{}}%
-\CSLLeftMargin{{[}10{]} }%
-\CSLRightInline{Lacko, J. (2023)  {{RCzechia}: {Spatial} {Objects} of the
+\CSLLeftMargin{{[}11{]} }%
+\CSLRightInline{Lacko, J. (2023). {{RCzechia}: {Spatial} {Objects} of the
 {Czech} {Republic},} \emph{Journal of Open Source Software}, vol. 8,
 no. 83, 5082. \url{https://doi.org/10.21105/joss.05082}.}
 
 \leavevmode\vadjust pre{\hypertarget{ref-miller20}{}}%
-\CSLLeftMargin{{[}11{]} }%
-\CSLRightInline{Lumley, T. based on Fortran code by Miller, A. (2020)
-{{leaps}: {Regression} {Subset} {Selection}.} Available at:
+\CSLLeftMargin{{[}12{]} }%
+\CSLRightInline{Lumley, T. based on Fortran code by Miller, A. (2020).
+\emph{{leaps}: {Regression} {Subset} {Selection}.} Available at:
 \url{https://CRAN.R-project.org/package=leaps} {{[}cited 2023-08-15{]}}}
 
 \leavevmode\vadjust pre{\hypertarget{ref-registr}{}}%
-\CSLLeftMargin{{[}12{]} }%
-\CSLRightInline{Ministerstvo dopravy ČR, \emph{Registr silničních
-vozidel,} Available at:
+\CSLLeftMargin{{[}13{]} }%
+\CSLRightInline{Ministerstvo dopravy ČR (2023). \emph{Registr silničních
+vozidel} Available at:
 \url{https://www.mdcr.cz/Statistiky/Silnicni-doprava/Centralni-registr-vozidel} {{[}cited 2023-08-15{]}}}
 
 \leavevmode\vadjust pre{\hypertarget{ref-parry23}{}}%
-\CSLLeftMargin{{[}13{]} }%
-\CSLRightInline{Parry, J. (2023) {{sfdep}: {Spatial} {Dependence} for
+\CSLLeftMargin{{[}14{]} }%
+\CSLRightInline{Parry, J. (2023). \emph{{sfdep}: {Spatial} {Dependence} for
 {Simple} {Features}.} Available at:
 \url{https://CRAN.R-project.org/package=sfdep} {{[}cited 2023-08-15{]}}}
 
 \leavevmode\vadjust pre{\hypertarget{ref-erko}{}}%
-\CSLLeftMargin{{[}14{]} }%
-\CSLRightInline{R Core Team (2023) \emph{R: A language and environment for
+\CSLLeftMargin{{[}15{]} }%
+\CSLRightInline{R Core Team (2023). \emph{R: A language and environment for
 statistical computing}. Vienna, Austria: R Foundation for Statistical
 Computing Available at: \url{https://www.R-project.org/} {{[}cited 2023-08-15{]}}}
 
 \leavevmode\vadjust pre{\hypertarget{ref-schulz_rode22}{}}%
-\CSLLeftMargin{{[}15{]} }%
-\CSLRightInline{Schulz, F. and Rode, J. (2022) {Public charging infrastructure
+\CSLLeftMargin{{[}16{]} }%
+\CSLRightInline{Schulz, F. \& Rode, J. (2022). {Public charging infrastructure
 and electric vehicles in {Norway},} \emph{Energy Policy}, vol. 160. 
 \url{https://doi.org/10.1016/j.enpol.2021.112660}.}
 
 \leavevmode\vadjust pre{\hypertarget{ref-schwarz78}{}}%
-\CSLLeftMargin{{[}16{]} }%
-\CSLRightInline{Schwarz, G. (1978) {Estimating the {Dimension} of a
+\CSLLeftMargin{{[}17{]} }%
+\CSLRightInline{Schwarz, G. (1978). {Estimating the {Dimension} of a
 {Model},} \emph{The Annals of Statistics}, vol. 6, no. 2, 461--464.
 \url{https://doi.org/10.1214/aos/1176344136}.}
 
 \leavevmode\vadjust pre{\hypertarget{ref-slaba_houst22}{}}%
-\CSLLeftMargin{{[}17{]} }%
-\CSLRightInline{Slabá, R. and Houšť, R. (2022) \emph{Ročenka dopravy {České
+\CSLLeftMargin{{[}18{]} }%
+\CSLRightInline{Slabá, R. \& Houšť, R. (2022). \emph{Ročenka dopravy {České
 Republiky} 2021,} {Ministerstvo dopravy ČR}, Available at:
 \url{https://www.sydos.cz/cs/rocenka-2021/index.html} {{[}cited 2023-08-15{]}}}
 
-\leavevmode\vadjust pre{\hypertarget{ref-struktura21}{}}%
-\CSLLeftMargin{{[}18{]} }%
-\CSLRightInline{{Struktura mezd zaměstnanců -- 2021,} Český
-statistický úřad. Available at:
-\url{https://www.czso.cz/csu/czso/struktura-mezd-zamestnancu-2021} {{[}cited 2023-08-15{]}}}
-
 \leavevmode\vadjust pre{\hypertarget{ref-scasny_etal18}{}}%
 \CSLLeftMargin{{[}19{]} }%
-\CSLRightInline{Ščasný, M., Zvěřinová, I. and Czajkowski, M. (2018) {Electric,
+\CSLRightInline{Ščasný, M., Zvěřinová, I. \& Czajkowski, M. (2018). {Electric,
 plug-in hybrid, hybrid, or conventional? {Polish} consumers' preferences
 for electric vehicles,} \emph{Energy Efficiency}, vol. 11, no. 8, 2181--2201.
 \url{https://doi.org/10.1007/s12053-018-9754-1}.}
-
-\leavevmode\vadjust pre{\hypertarget{ref-paris16}{}}%
-\CSLLeftMargin{{[}20{]} }%
-\CSLRightInline{\emph{The {Paris} {Agreement}.} Available at:
-\url{https://unfccc.int/process-and-meetings/the-paris-agreement} {{[}cited 2023-08-15{]}}}
-
-\leavevmode\vadjust pre{\hypertarget{ref-vysledky11}{}}%
-\CSLLeftMargin{{[}21{]} }%
-\CSLRightInline{{Výsledky sčítání lidu, domů a bytů 2011}, Český statistický úřad. Available at:
-\url{https://www.czso.cz/csu/czso/otevrena_data_pro_vysledky_scitani_lidu_domu_a_bytu_2011_sldb_2011} {{[}cited 2023-08-15{]}}}
 
 \end{CSLReferences}
 
